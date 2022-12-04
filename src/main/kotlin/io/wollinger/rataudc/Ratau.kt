@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 
 class Ratau(token: String): ListenerAdapter() {
-    private var jda: JDA
+    var jda: JDA
     private val commands = HashMap<String, ICommand>().also {
         it[KBCreate.label] = KBCreate
         it[KBJoin.label] = KBJoin
@@ -36,6 +36,7 @@ class Ratau(token: String): ListenerAdapter() {
         ArrayList<CommandData>().also {
             commands.forEach { (_, cmd) ->
                 it.add(cmd.getSlashCommand())
+                cmd.jda = jda
             }
             jda.updateCommands().addCommands(it).complete()
         }
