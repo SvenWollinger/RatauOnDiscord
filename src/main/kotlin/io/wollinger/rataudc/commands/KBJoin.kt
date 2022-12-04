@@ -16,7 +16,7 @@ object KBJoin: ICommand {
     }
 
     override fun getSlashCommand(): SlashCommandData {
-        return Commands.slash("kb-join", "Join someones knucklebone match").also {
+        return Commands.slash(label, "Join someones knucklebone match").also {
             it.isGuildOnly = true
             it.addOption(OptionType.USER, "user", "User to join", true)
         }

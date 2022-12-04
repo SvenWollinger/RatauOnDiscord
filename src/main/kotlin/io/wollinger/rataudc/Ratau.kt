@@ -1,9 +1,6 @@
 package io.wollinger.rataudc
 
-import io.wollinger.rataudc.commands.ICommand
-import io.wollinger.rataudc.commands.KBCreate
-import io.wollinger.rataudc.commands.KBJoin
-import io.wollinger.rataudc.commands.KBLeave
+import io.wollinger.rataudc.commands.*
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
@@ -19,6 +16,7 @@ class Ratau(token: String): ListenerAdapter() {
         it[KBCreate.label] = KBCreate
         it[KBJoin.label] = KBJoin
         it[KBLeave.label] = KBLeave
+        it[KBList.label] = KBList
     }
 
     init {
