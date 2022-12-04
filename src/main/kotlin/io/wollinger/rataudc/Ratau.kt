@@ -36,7 +36,7 @@ class Ratau(token: String): ListenerAdapter() {
         ArrayList<CommandData>().also {
             commands.forEach { (_, cmd) ->
                 it.add(cmd.getSlashCommand())
-                cmd.jda = jda
+                cmd.ratau = this
             }
             jda.updateCommands().addCommands(it).complete()
         }
