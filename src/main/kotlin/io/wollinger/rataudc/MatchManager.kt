@@ -1,6 +1,9 @@
 package io.wollinger.rataudc
 
-class Match(val ownerID: Long, var opponentID: Long? = null) {
+class Match(val ownerID: Long) {
+    var opponentID: Long? = null
+    val startTime: Long = Utils.currentTime()
+
     var ownerBoard = arrayOf(
         intArrayOf(0, 0, 0),
         intArrayOf(0, 0, 0),
