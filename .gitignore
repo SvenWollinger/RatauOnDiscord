@@ -1,0 +1,9 @@
+/bin/
+/SnipSniper/
+/.classpath
+/.project
+/.idea/
+/out/
+/.gradle/
+/build/
+/release/*
