@@ -15,8 +15,6 @@ object KBCreate: ICommand {
     }
 
     override fun getSlashCommand(): SlashCommandData {
-        return Commands.slash(label, "Create a knucklebones match").also {
-            it.isGuildOnly = true
-        }
+        return Commands.slash(label, "Create a knucklebones match")
     }
 }

@@ -15,8 +15,6 @@ object KBLeave: ICommand {
     }
 
     override fun getSlashCommand(): SlashCommandData {
-        return Commands.slash(label, "Leave your current match").also {
-            it.isGuildOnly = true
-        }
+        return Commands.slash(label, "Leave your current match")
     }
 }

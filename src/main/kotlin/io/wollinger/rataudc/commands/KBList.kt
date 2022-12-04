@@ -14,8 +14,6 @@ object KBList: ICommand {
     }
 
     override fun getSlashCommand(): SlashCommandData {
-        return Commands.slash(label, "List current matches").also {
-            it.isGuildOnly = true
-        }
+        return Commands.slash(label, "List current matches")
     }
 }
