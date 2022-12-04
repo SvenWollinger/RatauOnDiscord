@@ -8,6 +8,7 @@ object KBCreate: ICommand {
     override val label = "kb-create"
 
     override fun run(event: SlashCommandInteractionEvent) {
+        event.reply("create").queue()
     }
 
     override fun getSlashCommand(): SlashCommandData {

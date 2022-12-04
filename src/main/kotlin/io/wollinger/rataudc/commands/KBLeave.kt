@@ -8,6 +8,7 @@ object KBLeave: ICommand {
     override val label = "kb-leave"
 
     override fun run(event: SlashCommandInteractionEvent) {
+        event.reply("leave").queue()
     }
 
     override fun getSlashCommand(): SlashCommandData {

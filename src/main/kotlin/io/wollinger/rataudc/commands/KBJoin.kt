@@ -9,6 +9,7 @@ object KBJoin: ICommand {
     override val label = "kb-join"
 
     override fun run(event: SlashCommandInteractionEvent) {
+        event.reply("join").queue()
     }
 
     override fun getSlashCommand(): SlashCommandData {
