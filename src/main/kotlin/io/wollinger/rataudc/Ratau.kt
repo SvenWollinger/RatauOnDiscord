@@ -1,16 +1,25 @@
 package io.wollinger.rataudc
 
+import io.wollinger.rataudc.commands.ICommand
+import io.wollinger.rataudc.commands.KBCreate
+import io.wollinger.rataudc.commands.KBJoin
+import io.wollinger.rataudc.commands.KBLeave
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
-import net.dv8tion.jda.api.interactions.commands.OptionType
-import net.dv8tion.jda.api.interactions.commands.build.Commands
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.dv8tion.jda.api.interactions.commands.build.CommandData
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 
-class Ratau(token: String) {
+class Ratau(token: String): ListenerAdapter() {
     private var jda: JDA
+    private val commands = HashMap<String, ICommand>().also {
+        it[KBCreate.label] = KBCreate
+        it[KBJoin.label] = KBJoin
+        it[KBLeave.label] = KBLeave
+    }
 
     init {
         //Set up JDA
@@ -19,29 +28,25 @@ class Ratau(token: String) {
             it.enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_PRESENCES)
             it.setBulkDeleteSplittingEnabled(false)
             it.setActivity(Activity.playing("Knucklebones"))
+            it.addEventListeners(this)
         }.build()
         jda.awaitReady()
 
         //Set up slash commands
-        val commands = ArrayList<SlashCommandData>()
-        Commands.slash("kb-create", "Create a knucklebones match").also {
-            it.isGuildOnly = true
-            commands.add(it)
+        ArrayList<CommandData>().also {
+            commands.forEach { (_, cmd) ->
+                it.add(cmd.getSlashCommand())
+            }
+            jda.updateCommands().addCommands(it).complete()
         }
-        Commands.slash("kb-join", "Join someones knucklebone match").also {
-            it.isGuildOnly = true
-            it.addOption(OptionType.USER, "user", "User to join", true)
-            commands.add(it)
-        }
-        Commands.slash("kb-leave", "Leave your current match").also {
-            it.isGuildOnly = true
-            commands.add(it)
-        }
-        jda.updateCommands().addCommands(commands).complete()
 
         //Print registered commands
         jda.retrieveCommands().queue {
             it.forEach { cmd -> println("Registered command: $cmd") }
         }
+    }
+
+    override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
+        commands[event.name]?.run(event)
     }
 }
