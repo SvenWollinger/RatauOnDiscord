@@ -11,7 +11,10 @@ import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 
 class Ratau(token: String): ListenerAdapter() {
-    var jda: JDA
+    companion object {
+        lateinit var jda: JDA
+    }
+
     private val commands = HashMap<String, ICommand>().also {
         it[KBCreate.label] = KBCreate
         it[KBJoin.label] = KBJoin
@@ -43,6 +46,8 @@ class Ratau(token: String): ListenerAdapter() {
         jda.retrieveCommands().queue {
             it.forEach { cmd -> println("Registered command: $cmd") }
         }
+
+        MatchManager.startServices()
     }
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {

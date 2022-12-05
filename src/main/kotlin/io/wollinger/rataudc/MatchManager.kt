@@ -3,17 +3,37 @@ package io.wollinger.rataudc
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 
 class MatchPlayer(val userID: Long, val channel: MessageChannel) {
+    var username = Ratau.jda.retrieveUserById(userID).complete().name
+
     var board = arrayOf(
         intArrayOf(0, 0, 0),
         intArrayOf(0, 0, 0),
         intArrayOf(0, 0, 0)
     )
+
+    override fun toString() = "MatchPlayer(name=$username, id=$userID)"
 }
 
 class Match {
     var inviteLink: String? = null
     var player1: MatchPlayer? = null
+        set(value) {
+            field = value
+            checkIfStart()
+        }
     var player2: MatchPlayer? = null
+        set(value) {
+            field = value
+            checkIfStart()
+        }
+
+    private fun checkIfStart() {
+        if(player1 != null && player2 != null) {
+            println("Match started: $player1 vs $player2")
+            player1!!.channel.sendMessage("Starting match with $player2").queue()
+            player2!!.channel.sendMessage("Starting match with $player1").queue()
+        }
+    }
 }
 
 object MatchManager {
@@ -22,6 +42,14 @@ object MatchManager {
 
     private val inviteMatches = HashMap<String, Match>()
     private val usersMatches = HashMap<Long, Match>()
+    private var servicesStarted = false
+
+    fun startServices() {
+        if(servicesStarted) return
+        servicesStarted = true
+
+        //TODO: Start threads to weed out unused matches etc
+    }
 
     fun createInviteMatch(userID: Long, channel: MessageChannel): Response {
         if(usersMatches.containsKey(userID)) return Response(Result.HAS_RUNNING_MATCH)
@@ -32,6 +60,7 @@ object MatchManager {
             it.player1 = MatchPlayer(userID, channel)
             inviteMatches[inviteLink] = it
             usersMatches[userID] = it
+            println("Match created: Link($inviteLink) ${it.player1}")
         }
         return Response(Result.SUCCESS, inviteLink)
     }
