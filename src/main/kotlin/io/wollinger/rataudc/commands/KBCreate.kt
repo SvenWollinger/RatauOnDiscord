@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 
 object KBCreate: ICommand {
     override val label = "kb-create"
-    override lateinit var ratau: Ratau
 
     override fun run(event: SlashCommandInteractionEvent) {
         val response = MatchManager.createInviteMatch(event.user.idLong, event.channel)

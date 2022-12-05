@@ -14,5 +14,5 @@ fun main() {
             Files.write(it.toPath(), token.toByteArray())
         }
     }
-    Ratau(token)
+    Ratau.init(token)
 }

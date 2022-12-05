@@ -10,10 +10,8 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 
-class Ratau(token: String): ListenerAdapter() {
-    companion object {
-        lateinit var jda: JDA
-    }
+object Ratau: ListenerAdapter() {
+    lateinit var jda: JDA
 
     private val commands = HashMap<String, ICommand>().also {
         it[KBCreate.label] = KBCreate
@@ -22,7 +20,7 @@ class Ratau(token: String): ListenerAdapter() {
         it[KBList.label] = KBList
     }
 
-    init {
+    fun init(token: String) {
         //Set up JDA
         jda = JDABuilder.createDefault(token).also {
             it.disableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE)
@@ -35,10 +33,7 @@ class Ratau(token: String): ListenerAdapter() {
 
         //Set up slash commands
         ArrayList<CommandData>().also {
-            commands.forEach { (_, cmd) ->
-                it.add(cmd.getSlashCommand())
-                cmd.ratau = this
-            }
+            commands.forEach { (_, cmd) -> it.add(cmd.getSlashCommand()) }
             jda.updateCommands().addCommands(it).complete()
         }
 
