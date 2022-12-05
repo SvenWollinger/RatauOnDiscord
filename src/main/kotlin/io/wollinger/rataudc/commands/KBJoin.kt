@@ -1,5 +1,6 @@
 package io.wollinger.rataudc.commands
 
+import io.wollinger.rataudc.MatchManager
 import io.wollinger.rataudc.Ratau
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -12,12 +13,20 @@ object KBJoin: ICommand {
     override lateinit var ratau: Ratau
 
     override fun run(event: SlashCommandInteractionEvent) {
-        event.reply("join").queue()
+        val inviteLink = event.options[0].asString
+        val response = MatchManager.joinMatch(inviteLink, event.user.idLong, event.channel)
+        val message = when(response.result) {
+            MatchManager.Result.NOT_FOUND -> "Match not found!"
+            MatchManager.Result.SELF_JOIN_ERROR -> "You cant join yourself!"
+            MatchManager.Result.SUCCESS -> "Joined game!"
+            else -> "Bad response: ${response.result}"
+        }
+        event.reply(message).queue()
     }
 
     override fun getSlashCommand(): SlashCommandData {
         return Commands.slash(label, "Join someones knucklebone match").also {
-            it.addOption(OptionType.STRING, "invite-link", "Invite link")
+            it.addOption(OptionType.STRING, "invite-link", "Invite link", true)
         }
     }
 }

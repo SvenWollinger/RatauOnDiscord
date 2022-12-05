@@ -36,8 +36,8 @@ object MatchManager {
         return Response(Result.SUCCESS, inviteLink)
     }
 
-    fun isMatch(inviteLink: String) = inviteMatches.containsKey(inviteLink)
     fun joinMatch(inviteLink: String, userID: Long, channel: MessageChannel): Response {
+        if(!inviteMatches.containsKey(inviteLink)) return Response(Result.NOT_FOUND)
         inviteMatches[inviteLink]!!.also {
             if(it.player1!!.userID == userID) return Response(Result.SELF_JOIN_ERROR)
             it.player2 = MatchPlayer(userID, channel)
