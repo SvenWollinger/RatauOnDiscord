@@ -17,7 +17,7 @@ object KBJoin: ICommand {
 
     override fun getSlashCommand(): SlashCommandData {
         return Commands.slash(label, "Join someones knucklebone match").also {
-            it.addOption(OptionType.USER, "user", "User to join")
+            it.addOption(OptionType.STRING, "invite-link", "Invite link")
         }
     }
 }

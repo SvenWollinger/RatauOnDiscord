@@ -10,8 +10,12 @@ object KBCreate: ICommand {
     override lateinit var ratau: Ratau
 
     override fun run(event: SlashCommandInteractionEvent) {
-        val link = MatchManager.createInviteMatch(event.user.idLong, event.channel)
-        val message = if(link == null) "You already have a running match!" else "Match created!\nInvite link: $link"
+        val response = MatchManager.createInviteMatch(event.user.idLong, event.channel)
+        val message = when(response.result) {
+            MatchManager.Result.SUCCESS -> "Match created!\nInvite link: ${response.content}"
+            MatchManager.Result.HAS_RUNNING_MATCH -> "You already have a running match!"
+            else -> "Bad response: ${response.result}"
+        }
         event.reply(message).queue()
     }
 

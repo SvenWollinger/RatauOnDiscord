@@ -12,8 +12,13 @@ object KBLeave: ICommand {
     override lateinit var ratau: Ratau
 
     override fun run(event: SlashCommandInteractionEvent) {
-        MatchManager.leave(event.user.idLong)
-        event.reply("Done!").queue()
+        val response = MatchManager.leave(event.user.idLong)
+        val message = when(response.result) {
+            MatchManager.Result.SUCCESS -> "Match left"
+            MatchManager.Result.NOT_FOUND -> "Not in an active match"
+            else -> "Bad response: ${response.result}"
+        }
+        event.reply(message).queue()
     }
 
     override fun getSlashCommand(): SlashCommandData {

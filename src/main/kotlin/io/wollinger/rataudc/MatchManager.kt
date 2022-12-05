@@ -17,11 +17,14 @@ class Match {
 }
 
 object MatchManager {
+    enum class Result {SUCCESS, NOT_FOUND, SELF_JOIN_ERROR, HAS_RUNNING_MATCH}
+    class Response(val result: Result, val content: Any? = null)
+
     private val inviteMatches = HashMap<String, Match>()
     private val usersMatches = HashMap<Long, Match>()
 
-    fun createInviteMatch(userID: Long, channel: MessageChannel): String? {
-        if(usersMatches.containsKey(userID)) return null
+    fun createInviteMatch(userID: Long, channel: MessageChannel): Response {
+        if(usersMatches.containsKey(userID)) return Response(Result.HAS_RUNNING_MATCH)
 
         val inviteLink = Utils.getInviteLink(userID)
         Match().also {
@@ -30,14 +33,25 @@ object MatchManager {
             inviteMatches[inviteLink] = it
             usersMatches[userID] = it
         }
-        return inviteLink
+        return Response(Result.SUCCESS, inviteLink)
     }
 
-    fun leave(userID: Long) {
-        //TODO: Add events to notify players and match
+    fun isMatch(inviteLink: String) = inviteMatches.containsKey(inviteLink)
+    fun joinMatch(inviteLink: String, userID: Long, channel: MessageChannel): Response {
+        inviteMatches[inviteLink]!!.also {
+            if(it.player1!!.userID == userID) return Response(Result.SELF_JOIN_ERROR)
+            it.player2 = MatchPlayer(userID, channel)
+            usersMatches[userID] = it
+        }
+        return Response(Result.SUCCESS)
+    }
+
+    fun leave(userID: Long): Response {
         usersMatches[userID]?.also {
             usersMatches.remove(userID)
             inviteMatches.remove(it.inviteLink)
+            return Response(Result.SUCCESS)
         }
+        return Response(Result.NOT_FOUND)
     }
 }
