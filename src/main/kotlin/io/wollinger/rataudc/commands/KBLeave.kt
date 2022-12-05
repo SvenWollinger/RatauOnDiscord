@@ -1,5 +1,6 @@
 package io.wollinger.rataudc.commands
 
+import io.wollinger.rataudc.MatchManager
 import io.wollinger.rataudc.Ratau
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -11,7 +12,8 @@ object KBLeave: ICommand {
     override lateinit var ratau: Ratau
 
     override fun run(event: SlashCommandInteractionEvent) {
-        event.reply("leave").queue()
+        MatchManager.leave(event.user.idLong)
+        event.reply("Done!").queue()
     }
 
     override fun getSlashCommand(): SlashCommandData {

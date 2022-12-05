@@ -1,6 +1,5 @@
 package io.wollinger.rataudc.commands
 
-import io.wollinger.rataudc.MatchManager
 import io.wollinger.rataudc.Ratau
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.Commands
@@ -11,9 +10,7 @@ object KBList: ICommand {
     override lateinit var ratau: Ratau
 
     override fun run(event: SlashCommandInteractionEvent) {
-        val waiting = MatchManager.waitingUsers()
-        val total = MatchManager.totalMatches()
-        event.reply("$waiting Players waiting. $total total current matches.").queue()
+
     }
 
     override fun getSlashCommand(): SlashCommandData {
