@@ -20,18 +20,17 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
             val g = it.graphics
             val cellWidth = width / 3
             val cellHeight = height / 3
-            val diceHeight = (cellHeight - cellHeight * 0.2).toInt()
+            val diceSize = (cellHeight - cellHeight * 0.2).toInt()
             for(y in 0 until 3) {
                 for(x in 0 until 3) {
                     val cellX = x * cellWidth
                     val cellY = y * cellHeight
                     g.drawImage(Dice.bg, cellX, cellY, cellWidth, cellHeight, null)
-                    val value = getPiece(x, y)
-                    if(value != 0) {
-                        val img = Dice.dice[value - 1]
-                        val diceX = cellX + cellWidth / 2 - diceHeight / 2
-                        val diceY = cellY + cellHeight / 2 - diceHeight / 2
-                        g.drawImage(img, diceX, diceY, diceHeight, diceHeight, null)
+                    getPiece(x, y).also { piece ->
+                        if(piece != 0) {
+                            fun ds(c: Int, s: Int) = c + s / 2 - diceSize / 2
+                            g.drawImage(Dice.dice[piece - 1], ds(cellX, cellWidth), ds(cellY, cellHeight), diceSize, diceSize, null)
+                        }
                     }
                 }
             }
