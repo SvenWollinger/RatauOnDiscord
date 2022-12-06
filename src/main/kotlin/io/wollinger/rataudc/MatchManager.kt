@@ -1,7 +1,12 @@
 package io.wollinger.rataudc
 
+import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
+import net.dv8tion.jda.api.utils.FileUpload
 import okhttp3.internal.threadName
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
 import kotlin.concurrent.thread
 
 class MatchPlayer(val userID: Long, val channel: MessageChannel) {
@@ -12,6 +17,18 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
         intArrayOf(0, 0, 0),
         intArrayOf(0, 0, 0)
     )
+
+    fun renderBoard(width: Int, height: Int): BufferedImage {
+        return BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).also {
+            val g = it.graphics
+            val diceSize = width / 3
+            for(y in 0 until 3) {
+                for(x in 0 until 3) {
+                    g.drawImage(Dice.bg, x * diceSize, y * diceSize, diceSize, diceSize, null)
+                }
+            }
+        }
+    }
 
     override fun toString() = "MatchPlayer(name=$username, id=$userID)"
 }
