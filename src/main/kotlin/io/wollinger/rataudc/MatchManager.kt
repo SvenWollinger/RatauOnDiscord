@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.utils.FileUpload
 import okhttp3.internal.threadName
+import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -18,13 +19,26 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
         intArrayOf(0, 0, 0)
     )
 
+    fun getPiece(x: Int, y: Int) = board[y][x]
+
     fun renderBoard(width: Int, height: Int): BufferedImage {
         return BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).also {
             val g = it.graphics
-            val diceSize = width / 3
+            val cellWidth = width / 3
+            val cellHeight = height / 3
+            val diceHeight = (cellHeight - cellHeight * 0.2).toInt()
             for(y in 0 until 3) {
                 for(x in 0 until 3) {
-                    g.drawImage(Dice.bg, x * diceSize, y * diceSize, diceSize, diceSize, null)
+                    val cellX = x * cellWidth
+                    val cellY = y * cellHeight
+                    g.drawImage(Dice.bg, cellX, cellY, cellWidth, cellHeight, null)
+                    val value = getPiece(x, y)
+                    if(value != 0) {
+                        val img = Dice.dice[value - 1]
+                        val diceX = cellX + cellWidth / 2 - diceHeight / 2
+                        val diceY = cellY + cellHeight / 2 - diceHeight / 2
+                        g.drawImage(img, diceX, diceY, diceHeight, diceHeight, null)
+                    }
                 }
             }
         }
