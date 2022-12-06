@@ -3,7 +3,6 @@ package io.wollinger.rataudc
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import java.awt.Dimension
-import java.awt.Font
 import java.awt.Graphics2D
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
@@ -34,11 +33,11 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
                 for(x in 0 until 3) {
                     val cellX = x * cellWidth
                     val cellY = y * cellHeight
-                    g.drawImage(Dice.bg, cellX, cellY, cellWidth, cellHeight, null)
+                    g.drawImage(Resources.bg, cellX, cellY, cellWidth, cellHeight, null)
                     getPiece(x, y).also PieceAlso@ { piece ->
                         if(piece == 0) return@PieceAlso
                         fun ds(c: Int, s: Int) = c + s / 2 - diceSize / 2
-                        g.drawImage(Dice.dice[piece - 1], ds(cellX, cellWidth), ds(cellY, cellHeight), diceSize, diceSize, null)
+                        g.drawImage(Resources.dice[piece - 1], ds(cellX, cellWidth), ds(cellY, cellHeight), diceSize, diceSize, null)
                     }
                 }
             }
@@ -76,7 +75,7 @@ class Match {
 
 
             fun drawName(name: String, y: Int) {
-                g.font = Utils.findFont(Dimension(it.width, titleHeight), Dice.font, name, g)
+                g.font = Utils.findFont(Dimension(it.width, titleHeight), Resources.font, name, g)
                 g.drawString(name, 0, y)
             }
 
