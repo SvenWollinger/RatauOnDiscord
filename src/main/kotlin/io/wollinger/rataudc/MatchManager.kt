@@ -13,6 +13,7 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
     lateinit var opponentBoardMessage: Message
     lateinit var boardMessage: Message
     lateinit var rollMessage: Message
+    val otherMessages = ArrayList<Message>()
 
     private var board = arrayOf(
         intArrayOf(0, 0, 0),
@@ -87,13 +88,24 @@ class Match {
         }
     }
 
+    fun endGame() {
+        fun del(p: MatchPlayer) {
+            p.boardMessage.delete().queue()
+            p.opponentBoardMessage.delete().queue()
+            p.rollMessage.delete().queue()
+            p.otherMessages.forEach { it.delete().queue() }
+        }
+        del(player1!!)
+        del(player2!!)
+    }
+
     private fun checkIfStart() {
         if(player1 != null && player2 != null) {
             fun prepareBoard(p1: MatchPlayer, p2: MatchPlayer) {
-                p1.channel.sendMessage("${p1.username} VS ${p2.username}").complete()
-                p1.channel.sendMessage("Opponent Board:").complete()
+                p1.otherMessages.add(p1.channel.sendMessage("${p1.username} VS ${p2.username}").complete())
+                p1.otherMessages.add(p1.channel.sendMessage("Opponent Board:").complete())
                 p1.opponentBoardMessage = p1.channel.sendFiles(p2.renderBoard(512, 512).toFileUpload()).complete()
-                p1.channel.sendMessage("Your Board:").complete()
+                p1.otherMessages.add(p1.channel.sendMessage("Your Board:").complete())
                 p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(512, 512).toFileUpload()).complete()
                 p1.rollMessage = p1.channel.sendMessage("Roll here").complete()
             }
