@@ -26,11 +26,10 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
                     val cellX = x * cellWidth
                     val cellY = y * cellHeight
                     g.drawImage(Dice.bg, cellX, cellY, cellWidth, cellHeight, null)
-                    getPiece(x, y).also { piece ->
-                        if(piece != 0) {
-                            fun ds(c: Int, s: Int) = c + s / 2 - diceSize / 2
-                            g.drawImage(Dice.dice[piece - 1], ds(cellX, cellWidth), ds(cellY, cellHeight), diceSize, diceSize, null)
-                        }
+                    getPiece(x, y).also PieceAlso@ { piece ->
+                        if(piece == 0) return@PieceAlso
+                        fun ds(c: Int, s: Int) = c + s / 2 - diceSize / 2
+                        g.drawImage(Dice.dice[piece - 1], ds(cellX, cellWidth), ds(cellY, cellHeight), diceSize, diceSize, null)
                     }
                 }
             }
