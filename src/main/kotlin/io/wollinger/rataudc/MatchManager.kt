@@ -1,6 +1,8 @@
 package io.wollinger.rataudc
 
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
+import okhttp3.internal.threadName
+import kotlin.concurrent.thread
 
 class MatchPlayer(val userID: Long, val channel: MessageChannel) {
     var username = Ratau.jda.retrieveUserById(userID).complete().name
@@ -15,16 +17,20 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
 }
 
 class Match {
+    private var timeout = 120000
+    private var lastUpdated: Long = Utils.currentTime()
     var inviteLink: String? = null
     var player1: MatchPlayer? = null
         set(value) {
             field = value
             checkIfStart()
+            lastUpdated = Utils.currentTime()
         }
     var player2: MatchPlayer? = null
         set(value) {
             field = value
             checkIfStart()
+            lastUpdated = Utils.currentTime()
         }
 
     private fun checkIfStart() {
@@ -32,6 +38,19 @@ class Match {
             println("Match started: $player1 vs $player2")
             player1!!.channel.sendMessage("Starting match with $player2").queue()
             player2!!.channel.sendMessage("Starting match with $player1").queue()
+        }
+    }
+
+    fun checkLastUpdated() {
+        val timePassed = Utils.currentTime() - lastUpdated
+        if(timePassed >= timeout) {
+            fun e(p: MatchPlayer?) {
+                if(p == null) return
+                p.channel.sendMessage("No updates in a while. Killing match").queue()
+                MatchManager.leave(p.userID)
+            }
+            e(player1)
+            e(player2)
         }
     }
 }
@@ -48,7 +67,13 @@ object MatchManager {
         if(servicesStarted) return
         servicesStarted = true
 
-        //TODO: Start threads to weed out unused matches etc
+        thread {
+            Thread.currentThread().name = "MatchLastUpdateService"
+            while(true) {
+                inviteMatches.forEach { (_, u) -> u.checkLastUpdated() }
+                Thread.sleep(1000)
+            }
+        }
     }
 
     fun createInviteMatch(userID: Long, channel: MessageChannel): Response {
