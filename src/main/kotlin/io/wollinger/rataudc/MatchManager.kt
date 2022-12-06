@@ -1,13 +1,7 @@
 package io.wollinger.rataudc
 
-import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
-import net.dv8tion.jda.api.utils.FileUpload
-import okhttp3.internal.threadName
-import java.awt.Color
 import java.awt.image.BufferedImage
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.concurrent.thread
 
 class MatchPlayer(val userID: Long, val channel: MessageChannel) {
