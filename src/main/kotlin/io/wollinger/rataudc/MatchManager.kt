@@ -1,5 +1,6 @@
 package io.wollinger.rataudc
 
+import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import java.awt.Dimension
 import java.awt.Font
@@ -10,8 +11,11 @@ import kotlin.concurrent.thread
 
 class MatchPlayer(val userID: Long, val channel: MessageChannel) {
     var username = Ratau.jda.retrieveUserById(userID).complete().name
+    lateinit var opponentBoardMessage: Message
+    lateinit var boardMessage: Message
+    lateinit var rollMessage: Message
 
-    var board = arrayOf(
+    private var board = arrayOf(
         intArrayOf(0, 0, 0),
         intArrayOf(0, 0, 0),
         intArrayOf(0, 0, 0)
@@ -61,7 +65,6 @@ class Match {
             lastUpdated = Utils.currentTime()
         }
 
-    //TODO: Make the player we send it to appear on the bottom
     fun render(): BufferedImage {
         return BufferedImage(512, 1024, BufferedImage.TYPE_INT_ARGB).also {
             val g = it.graphics as Graphics2D
@@ -87,12 +90,16 @@ class Match {
 
     private fun checkIfStart() {
         if(player1 != null && player2 != null) {
-            println("Match started: $player1 vs $player2")
-            player1!!.channel.sendMessage("Starting match with $player2").queue()
-            player2!!.channel.sendMessage("Starting match with $player1").queue()
-            val img = render().toFileUpload()
-            player1!!.channel.sendFiles(img).queue()
-            player2!!.channel.sendFiles(img).queue()
+            fun prepareBoard(p1: MatchPlayer, p2: MatchPlayer) {
+                p1.channel.sendMessage("${p1.username} VS ${p2.username}").complete()
+                p1.channel.sendMessage("Opponent Board:").complete()
+                p1.opponentBoardMessage = p1.channel.sendFiles(p2.renderBoard(512, 512).toFileUpload()).complete()
+                p1.channel.sendMessage("Your Board:").complete()
+                p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(512, 512).toFileUpload()).complete()
+                p1.rollMessage = p1.channel.sendMessage("Roll here").complete()
+            }
+            prepareBoard(player1!!, player2!!)
+            prepareBoard(player2!!, player1!!)
         }
     }
 
