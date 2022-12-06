@@ -1,6 +1,10 @@
 package io.wollinger.rataudc
 
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.Graphics2D
+import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import kotlin.concurrent.thread
 
@@ -56,11 +60,38 @@ class Match {
             lastUpdated = Utils.currentTime()
         }
 
+    //TODO: Make the player we send it to appear on the bottom
+    fun render(): BufferedImage {
+        return BufferedImage(512, 1024, BufferedImage.TYPE_INT_ARGB).also {
+            val g = it.graphics as Graphics2D
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
+            val boardHeight = it.height / 3
+            val titleHeight = boardHeight / 2
+
+
+            fun drawName(name: String, y: Int) {
+                g.font = Utils.findFont(Dimension(it.width, titleHeight), Dice.font, name, g)
+                g.drawString(name, 0, y)
+            }
+
+            drawName(player1!!.username, titleHeight)
+            g.drawImage(player1!!.renderBoard(it.width, boardHeight), 0, titleHeight, null)
+
+            drawName(player2!!.username, boardHeight + titleHeight * 2)
+            g.drawImage(player2!!.renderBoard(it.width, boardHeight), 0, boardHeight + titleHeight * 2, null)
+        }
+    }
+
     private fun checkIfStart() {
         if(player1 != null && player2 != null) {
             println("Match started: $player1 vs $player2")
             player1!!.channel.sendMessage("Starting match with $player2").queue()
             player2!!.channel.sendMessage("Starting match with $player1").queue()
+            val img = render().toFileUpload()
+            player1!!.channel.sendFiles(img).queue()
+            player2!!.channel.sendFiles(img).queue()
         }
     }
 
