@@ -18,6 +18,7 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
     )
 
     fun getPiece(x: Int, y: Int) = board[y][x]
+    fun setPiece(x: Int, y: Int, piece: Int) = kotlin.run { board[y][x] = piece }
 
     fun renderBoard(width: Int, height: Int): BufferedImage {
         return BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).also {
