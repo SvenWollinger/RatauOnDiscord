@@ -36,7 +36,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     fun updateOpponentBoard(opponent: MatchPlayer) {
-        opponentBoardMessage.setImage(opponent.renderBoard(boardSize, boardSize)).queue()
+        opponentBoardMessage.setImage(opponent.renderBoard(boardSize, boardSize, true)).queue()
     }
 
     private fun updateBoard() {
@@ -83,7 +83,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         updateRollThing()
     }
 
-    fun renderBoard(width: Int, height: Int): BufferedImage {
+    fun renderBoard(width: Int, height: Int, mirrored: Boolean = false): BufferedImage {
         return BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).also {
             val g = it.graphics as Graphics2D
             g.antialise()
@@ -91,7 +91,8 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
             val cellHeight = height / 3
             for(y in 0 until 3) {
                 for(x in 0 until 3) {
-                    g.drawImage(Utils.renderDiceWithBG(getPiece(x, y), cellWidth, cellHeight), x * cellWidth, y * cellHeight, null)
+                    val piece = if(!mirrored) getPiece(x, y) else getPiece(x, 2 - y)
+                    g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight), x * cellWidth, y * cellHeight, null)
                 }
             }
         }
