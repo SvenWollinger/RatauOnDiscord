@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.buttons.Button
+import net.dv8tion.jda.api.utils.messages.MessageEditData
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import kotlin.concurrent.thread
@@ -42,6 +43,10 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
 }
 
 class Match {
+    private val boardSize = 256
+    private val textHeight = 64
+    private val rollThingWidth = 96
+
     private var timeout = 120000
     private var lastUpdated: Long = Utils.currentTime()
     var inviteLink: String? = null
@@ -69,12 +74,23 @@ class Match {
         del(player2!!)
     }
 
+    fun updateOpponentBoard(player: MatchPlayer, opponent: MatchPlayer) {
+        player.opponentBoardMessage.setImage(opponent.renderBoard(boardSize, boardSize)).queue()
+    }
+
+    fun updateBoard(player: MatchPlayer) {
+        player.boardMessage.setImage(player.renderBoard(boardSize, boardSize)).queue()
+    }
+
+    fun updateRollThing(player: MatchPlayer, piece: Int) {
+        player.rollMessage.setImage(Utils.renderDiceWithBG(piece, rollThingWidth, textHeight)).queue()
+    }
+
     private fun checkIfStart() {
         if(player1 != null && player2 != null) {
+            val pBegins = (0..1).random()
             fun prepareBoard(p1: MatchPlayer, p2: MatchPlayer) {
                 thread {
-                    val boardSize = 256
-                    val textHeight = 64
                     Thread.currentThread().name = "InitBoard-$p1-$p2"
                     p1.otherMessages.add(p1.channel.sendMessage("${p1.username} VS ${p2.username}").complete())
                     p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p2.username, boardSize, textHeight).toFileUpload()).complete())
@@ -82,7 +98,7 @@ class Match {
                     p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p1.username, boardSize, textHeight).toFileUpload()).complete())
                     p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(boardSize, boardSize).toFileUpload()).complete()
                     p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage("Your roll:", 128, textHeight).toFileUpload()).complete())
-                    p1.rollMessage = p1.channel.sendFiles(Utils.renderDiceWithBG(0, 96, textHeight).toFileUpload()).addActionRow(
+                    p1.rollMessage = p1.channel.sendFiles(Utils.renderDiceWithBG(0, rollThingWidth, textHeight).toFileUpload()).addActionRow(
                         Button.success("roll", Emoji.fromUnicode("\uD83C\uDFB2")).asDisabled(),
                         Button.primary("p1", Emoji.fromUnicode("1️⃣")).asDisabled(),
                         Button.primary("p2", Emoji.fromUnicode("2️⃣")).asDisabled(),
