@@ -65,29 +65,6 @@ class Match {
             lastUpdated = Utils.currentTime()
         }
 
-    fun render(): BufferedImage {
-        return BufferedImage(512, 1024, BufferedImage.TYPE_INT_ARGB).also {
-            val g = it.graphics as Graphics2D
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-
-            val boardHeight = it.height / 3
-            val titleHeight = boardHeight / 2
-
-
-            fun drawName(name: String, y: Int) {
-                g.font = Utils.findFont(Dimension(it.width, titleHeight), Resources.font, name, g)
-                g.drawString(name, 0, y)
-            }
-
-            drawName(player1!!.username, titleHeight)
-            g.drawImage(player1!!.renderBoard(it.width, boardHeight), 0, titleHeight, null)
-
-            drawName(player2!!.username, boardHeight + titleHeight * 2)
-            g.drawImage(player2!!.renderBoard(it.width, boardHeight), 0, boardHeight + titleHeight * 2, null)
-        }
-    }
-
     fun endGame() {
         fun del(p: MatchPlayer) {
             p.boardMessage.delete().queue()
@@ -102,12 +79,15 @@ class Match {
     private fun checkIfStart() {
         if(player1 != null && player2 != null) {
             fun prepareBoard(p1: MatchPlayer, p2: MatchPlayer) {
-                p1.otherMessages.add(p1.channel.sendMessage("${p1.username} VS ${p2.username}").complete())
-                p1.otherMessages.add(p1.channel.sendMessage("Opponent Board:").complete())
-                p1.opponentBoardMessage = p1.channel.sendFiles(p2.renderBoard(512, 512).toFileUpload()).complete()
-                p1.otherMessages.add(p1.channel.sendMessage("Your Board:").complete())
-                p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(512, 512).toFileUpload()).complete()
-                p1.rollMessage = p1.channel.sendMessage("Roll here").complete()
+                thread {
+                    Thread.currentThread().name = "InitBoard-$p1-$p2"
+                    p1.otherMessages.add(p1.channel.sendMessage("${p1.username} VS ${p2.username}").complete())
+                    p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p2.username, 512, 64).toFileUpload()).complete())
+                    p1.opponentBoardMessage = p1.channel.sendFiles(p2.renderBoard(512, 512).toFileUpload()).complete()
+                    p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p1.username, 512, 64).toFileUpload()).complete())
+                    p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(512, 512).toFileUpload()).complete()
+                    p1.rollMessage = p1.channel.sendMessage("Roll here").complete()
+                }
             }
             prepareBoard(player1!!, player2!!)
             prepareBoard(player2!!, player1!!)

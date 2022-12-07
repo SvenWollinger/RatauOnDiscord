@@ -1,9 +1,8 @@
 package io.wollinger.rataudc
 
 import org.apache.commons.codec.digest.DigestUtils
-import java.awt.Dimension
-import java.awt.Font
-import java.awt.Graphics
+import java.awt.*
+import java.awt.image.BufferedImage
 
 
 object Utils {
@@ -11,22 +10,26 @@ object Utils {
 
     fun getInviteLink(id: Long): String = DigestUtils.md5Hex(id.toString() + currentTime().toString())
 
-    private fun getFontSize(graphics: Graphics, font: Font, text: String): Dimension {
-        graphics.getFontMetrics(font).also { metrics ->
-            return Dimension(metrics.stringWidth(text) + 2, metrics.height + 2)
-        }
-    }
-
-    fun findFont(componentSize: Dimension, oldFont: Font, text: String, g: Graphics): Font {
-        var savedFont: Font = oldFont
-        for (i in 0..99) {
+    fun findFont(dim: Dimension, oldFont: Font, text: String, g: Graphics): Font {
+        var savedFont = oldFont
+        for (i in 0..256) {
             val newFont = oldFont.deriveFont(i.toFloat())
-            val d: Dimension = getFontSize(g, newFont, text)
-            if (componentSize.height < d.height || componentSize.width < d.width) {
+            val newDim = Dimension(g.getFontMetrics(newFont).stringWidth(text), newFont.size)
+            if (dim.height < newDim.height || dim.width < newDim.width) {
                 return savedFont
             }
             savedFont = newFont
         }
         return oldFont
+    }
+
+    fun renderStringToImage(string: String, width: Int, height: Int): BufferedImage {
+        return BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).also {
+            val g = it.graphics as Graphics2D
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+            g.font = findFont(Dimension(width, height), Resources.font, string, g)
+            g.drawString(string, 0, height - height / 4)
+        }
     }
 }

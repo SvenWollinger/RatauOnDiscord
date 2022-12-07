@@ -11,6 +11,7 @@ object KBJoin: ICommand {
 
     override fun run(event: SlashCommandInteractionEvent) {
         val inviteLink = event.options[0].asString
+        event.deferReply().queue()
         val response = MatchManager.joinMatch(inviteLink, event.user.idLong, event.channel)
         val message = when(response.result) {
             MatchManager.Result.NOT_FOUND -> "Match not found!"
@@ -18,7 +19,7 @@ object KBJoin: ICommand {
             MatchManager.Result.SUCCESS -> "Joined game!"
             else -> "Bad response: ${response.result}"
         }
-        event.reply(message).queue()
+        event.channel.sendMessage(message).queue()
     }
 
     override fun getSlashCommand(): SlashCommandData {
