@@ -4,18 +4,24 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.buttons.Button
+import net.dv8tion.jda.api.utils.messages.MessageCreateRequest
 import net.dv8tion.jda.api.utils.messages.MessageEditData
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.lang.Exception
 import kotlin.concurrent.thread
 
-class MatchPlayer(val userID: Long, val channel: MessageChannel) {
+class MatchPlayer(val match: Match, val userID: Long, val channel: MessageChannel) {
     var username = Ratau.jda.retrieveUserById(userID).complete().name
     lateinit var opponentBoardMessage: Message
     lateinit var boardMessage: Message
     lateinit var rollMessage: Message
     val otherMessages = ArrayList<Message>()
+    private var roll: Int = 0
+
+    private val boardSize = 256
+    private val textHeight = 64
+    private val rollThingWidth = 96
 
     private var board = arrayOf(
         intArrayOf(0, 0, 0),
@@ -25,6 +31,46 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
 
     fun getPiece(x: Int, y: Int) = board[y][x]
     fun setPiece(x: Int, y: Int, piece: Int) = kotlin.run { board[y][x] = piece }
+
+    private fun updateOpponentBoard(opponent: MatchPlayer) {
+        opponentBoardMessage.setImage(opponent.renderBoard(boardSize, boardSize)).queue()
+    }
+
+    private fun updateBoard() {
+        boardMessage.setImage(renderBoard(boardSize, boardSize)).queue()
+    }
+
+    fun hasSpace(row: Int) = board[row][0] == 0 || board[row][1] == 0 || board[row][2] == 0
+
+    private fun updateRollThing() {
+        fun b(btn: Button, b: Boolean) = if(b) btn else btn.asDisabled()
+        rollMessage.setImage(Utils.renderDiceWithBG(roll, rollThingWidth, textHeight)).setActionRow(
+            b(Button.success("${match.inviteLink}-${userID}-roll", Emoji.fromUnicode("\uD83C\uDFB2")), roll == 0),
+            b(Button.primary("${match.inviteLink}-${userID}-p1", Emoji.fromUnicode("1️⃣")), roll != 0 && hasSpace(0)),
+            b(Button.primary("${match.inviteLink}-${userID}-p2", Emoji.fromUnicode("2️⃣")), roll != 0 && hasSpace(1)),
+            b(Button.primary("${match.inviteLink}-${userID}-p3", Emoji.fromUnicode("3️⃣")), roll != 0 && hasSpace(2))
+        ).complete()
+    }
+
+    fun roll() {
+        roll = (1..6).random()
+        updateRollThing()
+    }
+
+    private fun setButtons() {
+        (Button.primary("", ""))
+    }
+
+    fun setupBoard(opponent: MatchPlayer) {
+        otherMessages.add(channel.sendMessage("${username} VS ${opponent.username}").complete())
+        otherMessages.add(channel.sendFiles(Utils.renderStringToImage(opponent.username, boardSize, textHeight).toFileUpload()).complete())
+        opponentBoardMessage = channel.sendFiles(opponent.renderBoard(boardSize, boardSize).toFileUpload()).complete()
+        otherMessages.add(channel.sendFiles(Utils.renderStringToImage(username, boardSize, textHeight).toFileUpload()).complete())
+        boardMessage = channel.sendFiles(renderBoard(boardSize, boardSize).toFileUpload()).complete()
+        otherMessages.add(channel.sendFiles(Utils.renderStringToImage("Your roll:", 128, textHeight).toFileUpload()).complete())
+        rollMessage = channel.sendMessage("roll").complete()
+        updateRollThing()
+    }
 
     fun renderBoard(width: Int, height: Int): BufferedImage {
         return BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).also {
@@ -44,9 +90,6 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
 }
 
 class Match {
-    private val boardSize = 256
-    private val textHeight = 64
-    private val rollThingWidth = 96
 
     private var timeout = 120000
     private var lastUpdated: Long = Utils.currentTime()
@@ -75,18 +118,6 @@ class Match {
         del(player2!!)
     }
 
-    fun updateOpponentBoard(player: MatchPlayer, opponent: MatchPlayer) {
-        player.opponentBoardMessage.setImage(opponent.renderBoard(boardSize, boardSize)).queue()
-    }
-
-    fun updateBoard(player: MatchPlayer) {
-        player.boardMessage.setImage(player.renderBoard(boardSize, boardSize)).queue()
-    }
-
-    fun updateRollThing(player: MatchPlayer, piece: Int) {
-        player.rollMessage.setImage(Utils.renderDiceWithBG(piece, rollThingWidth, textHeight)).queue()
-    }
-
     fun buttonEvent(playerID: Long, buttonID: String) {
         val player = when(playerID) {
             player1!!.userID -> player1
@@ -94,7 +125,7 @@ class Match {
             else -> throw Exception("Bad id: $playerID")
         }!!
         when(buttonID) {
-            "roll" -> updateRollThing(player, (1..6).random())
+            "roll" -> player.roll()
             "p1" -> TODO("roll")
             "p2" -> TODO("roll")
             "p3" -> TODO("roll")
@@ -103,26 +134,14 @@ class Match {
 
     private fun checkIfStart() {
         if(player1 != null && player2 != null) {
-            val pBegins = (0..1).random()
-            fun prepareBoard(p1: MatchPlayer, p2: MatchPlayer) {
-                thread {
-                    Thread.currentThread().name = "InitBoard-$p1-$p2"
-                    p1.otherMessages.add(p1.channel.sendMessage("${p1.username} VS ${p2.username}").complete())
-                    p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p2.username, boardSize, textHeight).toFileUpload()).complete())
-                    p1.opponentBoardMessage = p1.channel.sendFiles(p2.renderBoard(boardSize, boardSize).toFileUpload()).complete()
-                    p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p1.username, boardSize, textHeight).toFileUpload()).complete())
-                    p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(boardSize, boardSize).toFileUpload()).complete()
-                    p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage("Your roll:", 128, textHeight).toFileUpload()).complete())
-                    p1.rollMessage = p1.channel.sendFiles(Utils.renderDiceWithBG(0, rollThingWidth, textHeight).toFileUpload()).addActionRow(
-                        Button.success("${inviteLink}-${p1.userID}-roll", Emoji.fromUnicode("\uD83C\uDFB2")),
-                        Button.primary("${inviteLink}-${p1.userID}-p1", Emoji.fromUnicode("1️⃣")),
-                        Button.primary("${inviteLink}-${p1.userID}-p2", Emoji.fromUnicode("2️⃣")),
-                        Button.primary("${inviteLink}-${p1.userID}-p3", Emoji.fromUnicode("3️⃣"))
-                    ).complete()
-                }
+            thread {
+                Thread.currentThread().name = "InitBoard-$player1"
+                player1!!.setupBoard(player2!!)
             }
-            prepareBoard(player1!!, player2!!)
-            prepareBoard(player2!!, player1!!)
+            thread {
+                Thread.currentThread().name = "InitBoard-$player2"
+                player2!!.setupBoard(player1!!)
+            }
         }
     }
 
@@ -167,7 +186,7 @@ object MatchManager {
         val inviteLink = Utils.getInviteLink(userID)
         Match().also {
             it.inviteLink = inviteLink
-            it.player1 = MatchPlayer(userID, channel)
+            it.player1 = MatchPlayer(it, userID, channel)
             inviteMatches[inviteLink] = it
             usersMatches[userID] = it
             println("Match created: Link($inviteLink) ${it.player1}")
@@ -181,7 +200,7 @@ object MatchManager {
         if(!inviteMatches.containsKey(inviteLink)) return Response(Result.NOT_FOUND)
         inviteMatches[inviteLink]!!.also {
             if(it.player1!!.userID == userID) return Response(Result.SELF_JOIN_ERROR)
-            it.player2 = MatchPlayer(userID, channel)
+            it.player2 = MatchPlayer(it, userID, channel)
             usersMatches[userID] = it
         }
         return Response(Result.SUCCESS)
