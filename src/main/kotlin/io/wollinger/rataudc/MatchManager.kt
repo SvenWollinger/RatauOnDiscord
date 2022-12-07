@@ -2,6 +2,8 @@ package io.wollinger.rataudc
 
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
+import net.dv8tion.jda.api.entities.emoji.Emoji
+import net.dv8tion.jda.api.interactions.components.buttons.Button
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import kotlin.concurrent.thread
@@ -80,7 +82,12 @@ class Match {
                     p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p1.username, boardSize, textHeight).toFileUpload()).complete())
                     p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(boardSize, boardSize).toFileUpload()).complete()
                     p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage("Your roll:", 128, textHeight).toFileUpload()).complete())
-                    p1.rollMessage = p1.channel.sendFiles(Utils.renderDiceWithBG(0, 96, textHeight).toFileUpload()).complete()
+                    p1.rollMessage = p1.channel.sendFiles(Utils.renderDiceWithBG(0, 64, textHeight).toFileUpload()).addActionRow(
+                        Button.success("roll", Emoji.fromUnicode("\uD83C\uDFB2")),
+                        Button.primary("p1", Emoji.fromUnicode("1️⃣")),
+                        Button.primary("p2", Emoji.fromUnicode("2️⃣")),
+                        Button.primary("p3", Emoji.fromUnicode("3️⃣"))
+                    ).complete()
                 }
             }
             prepareBoard(player1!!, player2!!)
