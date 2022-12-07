@@ -7,6 +7,10 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.lang.Exception
+import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.concurrent.thread
 
 class MatchPlayer(private val match: Match, val userID: Long, val channel: MessageChannel) {
@@ -57,6 +61,24 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         }
     }
 
+    fun calculateColumnScore(column: Int): Int {
+        val numbers = CopyOnWriteArrayList<Int>()
+        for(i in 0..2) numbers.add(board[i][column])
+
+        var sum = 0
+        for(i in numbers) {
+            when(Collections.frequency(numbers, i)) {
+                1 -> sum+=i
+                2 ->  {
+                    sum += i * 4
+                    repeat(2) { numbers.remove(i) }
+                }
+                3 -> return i * 3 * 3
+            }
+        }
+        return sum;
+    }
+
     private fun updateRollThing() {
         fun b(btn: Button, b: Boolean) = if(b) btn else btn.asDisabled()
         rollMessage.setImage(Utils.renderDiceWithBG(roll, rollThingWidth, textHeight)).setContent("").setActionRow(
@@ -84,16 +106,35 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     fun renderBoard(width: Int, height: Int, mirrored: Boolean = false): BufferedImage {
-        return BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).also {
+        return BufferedImage(width, height + textHeight / 2, BufferedImage.TYPE_INT_ARGB).also {
             val g = it.graphics as Graphics2D
             g.antialise()
             val cellWidth = width / 3
             val cellHeight = height / 3
+
+            fun r(x: Int, y: Int, str: Int) {
+                val i = Utils.renderStringToImage(str.toString(), cellWidth, textHeight / 2)
+                g.drawImage(i, x, y, null)
+            }
+
+            if(!mirrored) {
+                r(0, 0, calculateColumnScore(0))
+                r(cellWidth, 0, calculateColumnScore(1))
+                r(cellWidth * 2, 0, calculateColumnScore(2))
+            }
+
             for(y in 0 until 3) {
                 for(x in 0 until 3) {
                     val piece = if(!mirrored) getPiece(x, y) else getPiece(x, 2 - y)
-                    g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight), x * cellWidth, y * cellHeight, null)
+                    val addX = if(!mirrored) textHeight / 2 else 0
+                    g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight), x * cellWidth, y * cellHeight + addX, null)
                 }
+            }
+
+            if(mirrored) {
+                r(0, height, calculateColumnScore(0))
+                r(cellWidth, height, calculateColumnScore(1))
+                r(cellWidth * 2, height, calculateColumnScore(2))
             }
         }
     }
