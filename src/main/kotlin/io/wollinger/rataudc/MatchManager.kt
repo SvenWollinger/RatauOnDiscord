@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage
 import java.lang.Exception
 import kotlin.concurrent.thread
 
-class MatchPlayer(val match: Match, val userID: Long, val channel: MessageChannel) {
+class MatchPlayer(private val match: Match, val userID: Long, val channel: MessageChannel) {
     var username = Ratau.jda.retrieveUserById(userID).complete().name
     lateinit var opponentBoardMessage: Message
     lateinit var boardMessage: Message
@@ -40,7 +40,22 @@ class MatchPlayer(val match: Match, val userID: Long, val channel: MessageChanne
         boardMessage.setImage(renderBoard(boardSize, boardSize)).queue()
     }
 
-    fun hasSpace(row: Int) = board[row][0] == 0 || board[row][1] == 0 || board[row][2] == 0
+    fun hasSpace(row: Int) = getPiece(row, 0) == 0 || getPiece(row, 1) == 0 || getPiece(row, 2) == 0
+    fun addPiece(row: Int) {
+        if(roll == 0) return
+
+        fun d(y: Int)  {
+            if(getPiece(row, y) == 0 && roll != 0) {
+                setPiece(row, y, roll)
+                roll = 0
+                updateBoard()
+                updateRollThing()
+            }
+        }
+        d(2)
+        d(1)
+        d(0)
+    }
 
     private fun updateRollThing() {
         fun b(btn: Button, b: Boolean) = if(b) btn else btn.asDisabled()
@@ -55,10 +70,6 @@ class MatchPlayer(val match: Match, val userID: Long, val channel: MessageChanne
     fun roll() {
         roll = (1..6).random()
         updateRollThing()
-    }
-
-    private fun setButtons() {
-        (Button.primary("", ""))
     }
 
     fun setupBoard(opponent: MatchPlayer) {
@@ -126,9 +137,9 @@ class Match {
         }!!
         when(buttonID) {
             "roll" -> player.roll()
-            "p1" -> TODO("roll")
-            "p2" -> TODO("roll")
-            "p3" -> TODO("roll")
+            "p1" -> player.addPiece(0)
+            "p2" -> player.addPiece(1)
+            "p3" -> player.addPiece(2)
         }
     }
 
