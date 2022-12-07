@@ -28,7 +28,8 @@ object Utils {
             val g = it.graphics as Graphics2D
             g.antialise()
             g.font = findFont(Dimension(width, height), Resources.font, string, g)
-            g.drawString(string, 0, height - height / 4)
+            val strWidth = g.fontMetrics.stringWidth(string)
+            g.drawString(string, width / 2 - strWidth / 2, height - height / 4)
         }
     }
 
