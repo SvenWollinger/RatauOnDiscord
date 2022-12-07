@@ -82,7 +82,7 @@ class Match {
                     p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p1.username, boardSize, textHeight).toFileUpload()).complete())
                     p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(boardSize, boardSize).toFileUpload()).complete()
                     p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage("Your roll:", 128, textHeight).toFileUpload()).complete())
-                    p1.rollMessage = p1.channel.sendFiles(Utils.renderDiceWithBG(0, 64, textHeight).toFileUpload()).addActionRow(
+                    p1.rollMessage = p1.channel.sendFiles(Utils.renderDiceWithBG(0, 96, textHeight).toFileUpload()).addActionRow(
                         Button.success("roll", Emoji.fromUnicode("\uD83C\uDFB2")),
                         Button.primary("p1", Emoji.fromUnicode("1️⃣")),
                         Button.primary("p2", Emoji.fromUnicode("2️⃣")),
