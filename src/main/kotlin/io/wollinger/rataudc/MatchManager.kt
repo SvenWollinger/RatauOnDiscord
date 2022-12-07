@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.utils.messages.MessageEditData
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
+import java.lang.Exception
 import kotlin.concurrent.thread
 
 class MatchPlayer(val userID: Long, val channel: MessageChannel) {
@@ -87,7 +88,17 @@ class Match {
     }
 
     fun buttonEvent(playerID: Long, buttonID: String) {
-        println("Player: $playerID for button $buttonID")
+        val player = when(playerID) {
+            player1!!.userID -> player1
+            player2!!.userID -> player2
+            else -> throw Exception("Bad id: $playerID")
+        }!!
+        when(buttonID) {
+            "roll" -> updateRollThing(player, (1..6).random())
+            "p1" -> TODO("roll")
+            "p2" -> TODO("roll")
+            "p3" -> TODO("roll")
+        }
     }
 
     private fun checkIfStart() {
