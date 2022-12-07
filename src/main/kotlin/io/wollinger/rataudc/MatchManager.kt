@@ -83,10 +83,10 @@ class Match {
                     p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(boardSize, boardSize).toFileUpload()).complete()
                     p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage("Your roll:", 128, textHeight).toFileUpload()).complete())
                     p1.rollMessage = p1.channel.sendFiles(Utils.renderDiceWithBG(0, 96, textHeight).toFileUpload()).addActionRow(
-                        Button.success("roll", Emoji.fromUnicode("\uD83C\uDFB2")),
-                        Button.primary("p1", Emoji.fromUnicode("1️⃣")),
-                        Button.primary("p2", Emoji.fromUnicode("2️⃣")),
-                        Button.primary("p3", Emoji.fromUnicode("3️⃣"))
+                        Button.success("roll", Emoji.fromUnicode("\uD83C\uDFB2")).asDisabled(),
+                        Button.primary("p1", Emoji.fromUnicode("1️⃣")).asDisabled(),
+                        Button.primary("p2", Emoji.fromUnicode("2️⃣")).asDisabled(),
+                        Button.primary("p3", Emoji.fromUnicode("3️⃣")).asDisabled()
                     ).complete()
                 }
             }
