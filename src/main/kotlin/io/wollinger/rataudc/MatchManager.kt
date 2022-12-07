@@ -64,7 +64,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
 
     private fun updateRollThing() {
         fun b(btn: Button, b: Boolean) = if(b) btn else btn.asDisabled()
-        rollMessage.setImage(Utils.renderDiceWithBG(roll, rollThingWidth, textHeight)).setActionRow(
+        rollMessage.setImage(Utils.renderDiceWithBG(roll, rollThingWidth, textHeight)).setContent("").setActionRow(
             b(Button.success("${match.inviteLink}-${userID}-roll", Emoji.fromUnicode("\uD83C\uDFB2")), roll == 0),
             b(Button.primary("${match.inviteLink}-${userID}-p1", Emoji.fromUnicode("1️⃣")), roll != 0 && hasSpace(0)),
             b(Button.primary("${match.inviteLink}-${userID}-p2", Emoji.fromUnicode("2️⃣")), roll != 0 && hasSpace(1)),
