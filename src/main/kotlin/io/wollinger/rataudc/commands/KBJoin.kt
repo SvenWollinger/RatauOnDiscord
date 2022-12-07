@@ -19,7 +19,7 @@ object KBJoin: ICommand {
             MatchManager.Result.SUCCESS -> "Joined game!"
             else -> "Bad response: ${response.result}"
         }
-        event.channel.sendMessage(message).queue()
+        event.hook.editOriginal(message).queue()
     }
 
     override fun getSlashCommand(): SlashCommandData {
