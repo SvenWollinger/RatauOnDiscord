@@ -37,6 +37,7 @@ object Utils {
             val g = it.graphics as Graphics2D
             g.antialise()
             g.drawImage(Resources.bg, 0, 0, width, height, null)
+            if(piece == 0) return@also
             val diceSize = (height * 0.8).toInt()
             fun d(n: Int) = n / 2 - diceSize / 2
             g.drawImage(Resources.dice[piece - 1], d(width), d(height), diceSize, diceSize, null)

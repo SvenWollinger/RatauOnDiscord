@@ -2,9 +2,7 @@ package io.wollinger.rataudc
 
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
-import java.awt.Dimension
 import java.awt.Graphics2D
-import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import kotlin.concurrent.thread
 
@@ -26,20 +24,13 @@ class MatchPlayer(val userID: Long, val channel: MessageChannel) {
 
     fun renderBoard(width: Int, height: Int): BufferedImage {
         return BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).also {
-            val g = it.graphics
+            val g = it.graphics as Graphics2D
+            g.antialise()
             val cellWidth = width / 3
             val cellHeight = height / 3
-            val diceSize = (cellHeight - cellHeight * 0.2).toInt()
             for(y in 0 until 3) {
                 for(x in 0 until 3) {
-                    val cellX = x * cellWidth
-                    val cellY = y * cellHeight
-                    g.drawImage(Resources.bg, cellX, cellY, cellWidth, cellHeight, null)
-                    getPiece(x, y).also PieceAlso@ { piece ->
-                        if(piece == 0) return@PieceAlso
-                        fun ds(c: Int, s: Int) = c + s / 2 - diceSize / 2
-                        g.drawImage(Resources.dice[piece - 1], ds(cellX, cellWidth), ds(cellY, cellHeight), diceSize, diceSize, null)
-                    }
+                    g.drawImage(Utils.renderDiceWithBG(getPiece(x, y), cellWidth, cellHeight), x * cellWidth, y * cellHeight, null)
                 }
             }
         }
