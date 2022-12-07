@@ -25,6 +25,8 @@ object Utils {
 
     fun renderStringToImage(string: String, width: Int, height: Int): BufferedImage {
         return BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).also {
+            if(string.isEmpty()) return@also
+
             val g = it.graphics as Graphics2D
             g.antialise()
             g.font = findFont(Dimension(width, height), Resources.font, string, g)

@@ -82,10 +82,10 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     private fun updateRollThing() {
         fun b(btn: Button, b: Boolean) = if(b) btn else btn.asDisabled()
         rollMessage.setImage(Utils.renderDiceWithBG(roll, rollThingWidth, textHeight)).setContent("").setActionRow(
-            b(Button.success("${match.inviteLink}-${userID}-roll", Emoji.fromUnicode("\uD83C\uDFB2")), roll == 0),
-            b(Button.primary("${match.inviteLink}-${userID}-p1", Emoji.fromUnicode("1️⃣")), roll != 0 && hasSpace(0)),
-            b(Button.primary("${match.inviteLink}-${userID}-p2", Emoji.fromUnicode("2️⃣")), roll != 0 && hasSpace(1)),
-            b(Button.primary("${match.inviteLink}-${userID}-p3", Emoji.fromUnicode("3️⃣")), roll != 0 && hasSpace(2))
+            b(Button.secondary("${match.inviteLink}-${userID}-roll", Emoji.fromUnicode("\uD83C\uDFB2")), roll == 0),
+            b(Button.secondary("${match.inviteLink}-${userID}-p1", Emoji.fromUnicode("1️⃣")), roll != 0 && hasSpace(0)),
+            b(Button.secondary("${match.inviteLink}-${userID}-p2", Emoji.fromUnicode("2️⃣")), roll != 0 && hasSpace(1)),
+            b(Button.secondary("${match.inviteLink}-${userID}-p3", Emoji.fromUnicode("3️⃣")), roll != 0 && hasSpace(2))
         ).complete()
     }
 
@@ -97,23 +97,24 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     fun setupBoard(opponent: MatchPlayer) {
         otherMessages.add(channel.sendMessage("${username} VS ${opponent.username}").complete())
         otherMessages.add(channel.sendFiles(Utils.renderStringToImage(opponent.username, boardSize, textHeight).toFileUpload()).complete())
-        opponentBoardMessage = channel.sendFiles(opponent.renderBoard(boardSize, boardSize).toFileUpload()).complete()
-        otherMessages.add(channel.sendFiles(Utils.renderStringToImage(username, boardSize, textHeight).toFileUpload()).complete())
+        opponentBoardMessage = channel.sendFiles(opponent.renderBoard(boardSize, boardSize, true).toFileUpload()).complete()
+        otherMessages.add(channel.sendFiles(Utils.renderStringToImage("", boardSize, textHeight / 2).toFileUpload()).complete())
         boardMessage = channel.sendFiles(renderBoard(boardSize, boardSize).toFileUpload()).complete()
-        otherMessages.add(channel.sendFiles(Utils.renderStringToImage("Your roll:", 128, textHeight).toFileUpload()).complete())
+        //otherMessages.add(channel.sendFiles(Utils.renderStringToImage("Your roll:", 128, textHeight).toFileUpload()).complete())
         rollMessage = channel.sendMessage("roll").complete()
         updateRollThing()
     }
 
     fun renderBoard(width: Int, height: Int, mirrored: Boolean = false): BufferedImage {
-        return BufferedImage(width, height + textHeight / 2, BufferedImage.TYPE_INT_ARGB).also {
+        val scoreSize = textHeight / 3
+        return BufferedImage(width, height + scoreSize, BufferedImage.TYPE_INT_ARGB).also {
             val g = it.graphics as Graphics2D
             g.antialise()
             val cellWidth = width / 3
             val cellHeight = height / 3
 
             fun r(x: Int, y: Int, str: Int) {
-                val i = Utils.renderStringToImage(str.toString(), cellWidth, textHeight / 2)
+                val i = Utils.renderStringToImage(str.toString(), cellWidth, scoreSize)
                 g.drawImage(i, x, y, null)
             }
 
@@ -126,7 +127,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
             for(y in 0 until 3) {
                 for(x in 0 until 3) {
                     val piece = if(!mirrored) getPiece(x, y) else getPiece(x, 2 - y)
-                    val addX = if(!mirrored) textHeight / 2 else 0
+                    val addX = if(!mirrored) scoreSize else 0
                     g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight), x * cellWidth, y * cellHeight + addX, null)
                 }
             }
