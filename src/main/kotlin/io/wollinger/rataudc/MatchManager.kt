@@ -4,8 +4,6 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.buttons.Button
-import net.dv8tion.jda.api.utils.messages.MessageCreateRequest
-import net.dv8tion.jda.api.utils.messages.MessageEditData
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.lang.Exception
@@ -45,21 +43,18 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         boardMessage.setImage(renderBoard(boardSize, boardSize)).queue()
     }
 
-    fun hasSpace(row: Int) = getPiece(row, 0) == 0 || getPiece(row, 1) == 0 || getPiece(row, 2) == 0
-    fun addPiece(row: Int) {
+    fun hasSpace(column: Int) = getPiece(column, 0) == 0 || getPiece(column, 1) == 0 || getPiece(column, 2) == 0
+    fun addPiece(column: Int) {
         if(roll == 0) return
 
-        fun d(y: Int)  {
-            if(getPiece(row, y) == 0 && roll != 0) {
-                setPiece(row, y, roll)
+        for(y in 0..2) {
+            if(getPiece(column, y) == 0 && roll != 0) {
+                setPiece(column, y, roll)
                 roll = 0
                 updateBoard()
                 updateRollThing()
             }
         }
-        d(2)
-        d(1)
-        d(0)
     }
 
     private fun updateRollThing() {
