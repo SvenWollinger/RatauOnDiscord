@@ -23,6 +23,8 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     private val textHeight = 64
     private val rollThingWidth = 96
 
+    private var changeListener: ((MatchPlayer) -> Unit)? = null
+
     private var board = arrayOf(
         intArrayOf(0, 0, 0),
         intArrayOf(0, 0, 0),
@@ -30,9 +32,12 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     )
 
     fun getPiece(x: Int, y: Int) = board[y][x]
-    fun setPiece(x: Int, y: Int, piece: Int) = kotlin.run { board[y][x] = piece }
+    fun setPiece(x: Int, y: Int, piece: Int) {
+        board[y][x] = piece
+        changeListener?.invoke(this)
+    }
 
-    private fun updateOpponentBoard(opponent: MatchPlayer) {
+    fun updateOpponentBoard(opponent: MatchPlayer) {
         opponentBoardMessage.setImage(opponent.renderBoard(boardSize, boardSize)).queue()
     }
 
@@ -97,6 +102,10 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         }
     }
 
+    fun setBoardChangeListener(action: (MatchPlayer) -> Unit) {
+        changeListener = action
+    }
+
     override fun toString() = "MatchPlayer(name=$username, id=$userID)"
 }
 
@@ -148,10 +157,16 @@ class Match {
             thread {
                 Thread.currentThread().name = "InitBoard-$player1"
                 player1!!.setupBoard(player2!!)
+                player1!!.setBoardChangeListener {
+                    player2!!.updateOpponentBoard(player1!!)
+                }
             }
             thread {
                 Thread.currentThread().name = "InitBoard-$player2"
                 player2!!.setupBoard(player1!!)
+                player2!!.setBoardChangeListener {
+                    player1!!.updateOpponentBoard(player2!!)
+                }
             }
         }
     }
