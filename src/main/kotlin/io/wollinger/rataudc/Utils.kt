@@ -26,8 +26,7 @@ object Utils {
     fun renderStringToImage(string: String, width: Int, height: Int): BufferedImage {
         return BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).also {
             val g = it.graphics as Graphics2D
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+            g.antialise()
             g.font = findFont(Dimension(width, height), Resources.font, string, g)
             g.drawString(string, 0, height - height / 4)
         }
