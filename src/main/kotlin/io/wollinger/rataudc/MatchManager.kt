@@ -86,6 +86,10 @@ class Match {
         player.rollMessage.setImage(Utils.renderDiceWithBG(piece, rollThingWidth, textHeight)).queue()
     }
 
+    fun buttonEvent(playerID: Long, buttonID: String) {
+        println("Player: $playerID for button $buttonID")
+    }
+
     private fun checkIfStart() {
         if(player1 != null && player2 != null) {
             val pBegins = (0..1).random()
@@ -99,10 +103,10 @@ class Match {
                     p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(boardSize, boardSize).toFileUpload()).complete()
                     p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage("Your roll:", 128, textHeight).toFileUpload()).complete())
                     p1.rollMessage = p1.channel.sendFiles(Utils.renderDiceWithBG(0, rollThingWidth, textHeight).toFileUpload()).addActionRow(
-                        Button.success("roll", Emoji.fromUnicode("\uD83C\uDFB2")).asDisabled(),
-                        Button.primary("p1", Emoji.fromUnicode("1️⃣")).asDisabled(),
-                        Button.primary("p2", Emoji.fromUnicode("2️⃣")).asDisabled(),
-                        Button.primary("p3", Emoji.fromUnicode("3️⃣")).asDisabled()
+                        Button.success("${inviteLink}-${p1.userID}-roll", Emoji.fromUnicode("\uD83C\uDFB2")),
+                        Button.primary("${inviteLink}-${p1.userID}-p1", Emoji.fromUnicode("1️⃣")),
+                        Button.primary("${inviteLink}-${p1.userID}-p2", Emoji.fromUnicode("2️⃣")),
+                        Button.primary("${inviteLink}-${p1.userID}-p3", Emoji.fromUnicode("3️⃣"))
                     ).complete()
                 }
             }
@@ -159,6 +163,8 @@ object MatchManager {
         }
         return Response(Result.SUCCESS, inviteLink)
     }
+
+    fun getMatch(inviteLink: String): Match? = inviteMatches[inviteLink]
 
     fun joinMatch(inviteLink: String, userID: Long, channel: MessageChannel): Response {
         if(!inviteMatches.containsKey(inviteLink)) return Response(Result.NOT_FOUND)

@@ -5,10 +5,12 @@ import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.cache.CacheFlag
+
 
 object Ratau: ListenerAdapter() {
     lateinit var jda: JDA
@@ -43,6 +45,16 @@ object Ratau: ListenerAdapter() {
         }
 
         MatchManager.startServices()
+    }
+
+    override fun onButtonInteraction(event: ButtonInteractionEvent) {
+        //We need to reply, so we do this
+        event.reply(".").queue { it.deleteOriginal().queue() }
+
+        val parts = event.componentId.split("-")
+        if(parts.size < 3) return
+
+        MatchManager.getMatch(parts[0])?.buttonEvent(parts[1].toLong(), parts[2])
     }
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
