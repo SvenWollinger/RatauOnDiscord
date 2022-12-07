@@ -14,7 +14,7 @@ import kotlin.collections.HashMap
 import kotlin.concurrent.thread
 
 class MatchPlayer(private val match: Match, val userID: Long, val channel: MessageChannel) {
-    var username = Ratau.jda.retrieveUserById(userID).complete().name
+    private var username = Ratau.jda.retrieveUserById(userID).complete().name
     lateinit var opponentBoardMessage: Message
     lateinit var boardMessage: Message
     lateinit var rollMessage: Message
@@ -68,7 +68,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         var sum = 0
         for(i in numbers) {
             when(Collections.frequency(numbers, i)) {
-                1 -> sum+=i
+                1 -> sum += i
                 2 ->  {
                     sum += i * 4
                     repeat(2) { numbers.remove(i) }
@@ -76,7 +76,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
                 3 -> return i * 3 * 3
             }
         }
-        return sum;
+        return sum
     }
 
     private fun updateRollThing() {
@@ -95,7 +95,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     fun setupBoard(opponent: MatchPlayer) {
-        otherMessages.add(channel.sendMessage("${username} VS ${opponent.username}").complete())
+        otherMessages.add(channel.sendMessage("$username VS ${opponent.username}").complete())
         otherMessages.add(channel.sendFiles(Utils.renderStringToImage(opponent.username, boardSize, textHeight).toFileUpload()).complete())
         opponentBoardMessage = channel.sendFiles(opponent.renderBoard(boardSize, boardSize, true).toFileUpload()).complete()
         otherMessages.add(channel.sendFiles(Utils.renderStringToImage("", boardSize, textHeight / 2).toFileUpload()).complete())
