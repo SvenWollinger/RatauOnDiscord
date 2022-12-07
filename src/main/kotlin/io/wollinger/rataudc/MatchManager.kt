@@ -71,13 +71,16 @@ class Match {
         if(player1 != null && player2 != null) {
             fun prepareBoard(p1: MatchPlayer, p2: MatchPlayer) {
                 thread {
+                    val boardSize = 256
+                    val textHeight = 64
                     Thread.currentThread().name = "InitBoard-$p1-$p2"
                     p1.otherMessages.add(p1.channel.sendMessage("${p1.username} VS ${p2.username}").complete())
-                    p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p2.username, 512, 64).toFileUpload()).complete())
-                    p1.opponentBoardMessage = p1.channel.sendFiles(p2.renderBoard(512, 512).toFileUpload()).complete()
-                    p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p1.username, 512, 64).toFileUpload()).complete())
-                    p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(512, 512).toFileUpload()).complete()
-                    p1.rollMessage = p1.channel.sendMessage("Roll here").complete()
+                    p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p2.username, boardSize, textHeight).toFileUpload()).complete())
+                    p1.opponentBoardMessage = p1.channel.sendFiles(p2.renderBoard(boardSize, boardSize).toFileUpload()).complete()
+                    p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage(p1.username, boardSize, textHeight).toFileUpload()).complete())
+                    p1.boardMessage = p1.channel.sendFiles(p1.renderBoard(boardSize, boardSize).toFileUpload()).complete()
+                    p1.otherMessages.add(p1.channel.sendFiles(Utils.renderStringToImage("Your roll:", 128, textHeight).toFileUpload()).complete())
+                    p1.rollMessage = p1.channel.sendFiles(Utils.renderDiceWithBG(0, 96, textHeight).toFileUpload()).complete()
                 }
             }
             prepareBoard(player1!!, player2!!)
