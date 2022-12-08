@@ -32,25 +32,27 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     )
 
     fun getPiece(x: Int, y: Int) = board[y][x]
-    fun setPiece(x: Int, y: Int, piece: Int) {
+    fun setPiece(x: Int, y: Int, piece: Int, quietChange: Boolean = false) {
         board[y][x] = piece
-        boardChangeListener?.invoke(this)
+        if(!quietChange) boardChangeListener?.invoke(this)
     }
 
     fun updateOpponentBoard(opponent: MatchPlayer) {
         opponentBoardMessage.setImage(opponent.renderBoard(boardSize, boardSize, true)).queue()
     }
 
-    private fun updateBoard() {
+    fun updateBoard() {
         boardMessage.setImage(renderBoard(boardSize, boardSize)).queue()
     }
 
     //Returns true if we did destroy something
     fun destroyPieces(column: Int, piece: Int): Boolean {
+        if(piece == 0) return false
         var didDestroy = false
         for (i in 0..2) {
-            if (board[i][column] == piece) {
-                board[i][column] = 0
+            if (getPiece(column, i) == piece) {
+                //Quiet change, we dont want this to cause any updates by itself visually
+                setPiece(column, i, 0, true)
                 didDestroy = true
             }
         }
@@ -61,7 +63,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         var didDestroy = false
         for(x in 0..2) {
             for(y in 0..2) {
-                if(destroyPieces(y, opponent.getPiece(x, y)))
+                if(destroyPieces(x, opponent.getPiece(x, y)))
                     didDestroy = true
             }
         }
@@ -117,7 +119,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     fun roll() {
-        roll = 4//(1..6).random()
+        roll = (1..6).random()
         updateRollThing()
     }
 
