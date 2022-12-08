@@ -21,7 +21,6 @@ object Ratau: ListenerAdapter() {
         it[KBCreate.label] = KBCreate
         it[KBJoin.label] = KBJoin
         it[KBLeave.label] = KBLeave
-        it[KBList.label] = KBList
     }
 
     fun init(token: String) {

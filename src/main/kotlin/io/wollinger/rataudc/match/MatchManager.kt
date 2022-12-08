@@ -66,6 +66,7 @@ object MatchManager {
         usersMatches[userID]?.also {
             usersMatches.remove(userID)
             inviteMatches.remove(it.inviteLink)
+            it.endGame()
             return Response(Result.SUCCESS)
         }
         return Response(Result.NOT_FOUND)

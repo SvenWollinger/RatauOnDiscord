@@ -21,7 +21,7 @@ class Match {
         return if(sc1 == sc2) null else if(sc1 > sc2) player1!! else player2!!
     }
 
-    private var timeout = 120000
+    private var timeout = 60000 * 10 //10 minutes
     private var lastUpdated: Long = Utils.currentTime()
     private fun refreshLastUpdated() = kotlin.run { lastUpdated = Utils.currentTime() }
 
@@ -39,12 +39,25 @@ class Match {
             refreshLastUpdated()
         }
 
-    private fun endGame() {
-        fun bye(p: MatchPlayer) {
-            MatchManager.leave(p.userID)
+    fun endGame() {
+        if(state == STATE.END) return
+
+        state = STATE.END
+        if(isFull()) {
+            player1!!.refreshUpdateMessage()
+            player2!!.refreshUpdateMessage()
+            fun s(p: MatchPlayer) {
+                p.channel.sendMessage("https://static.wikia.nocookie.net/cult-of-the-lamb/images/0/02/Ratau-knucklebones-win-game-loop.gif").queue()
+                p.channel.sendMessage("Thanks for playing!").queue()
+            }
+            s(player1!!)
+            s(player2!!)
         }
-        bye(player1!!)
-        bye(player2!!)
+        fun bye(p: MatchPlayer?) {
+            if(p != null) MatchManager.leave(p.userID)
+        }
+        bye(player1)
+        bye(player2)
     }
 
     fun handleMessage(playerID: Long, message: String) {
@@ -104,12 +117,8 @@ class Match {
                         //If opponents board changed with our change update our own opponentMessage as well
                         if(didChangeOpponent) p1.updateOpponentBoard(p2)
 
-                        if(isDone() && state != STATE.END) {
-                            state = STATE.END
-                            p1.refreshUpdateMessage()
-                            p2.refreshUpdateMessage()
+                        if(isDone())
                             endGame()
-                        }
                     }
                 }
             }

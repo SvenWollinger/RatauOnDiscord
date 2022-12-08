@@ -11,7 +11,7 @@ object KBJoin: ICommand {
 
     override fun run(event: SlashCommandInteractionEvent) {
         val inviteLink = event.options[0].asString
-        event.deferReply().queue()
+        event.deferReply().setEphemeral(true).queue()
         val response = MatchManager.joinMatch(inviteLink, event.user.idLong, event.channel)
         val message = when(response.result) {
             MatchManager.Result.NOT_FOUND -> "Match not found!"
