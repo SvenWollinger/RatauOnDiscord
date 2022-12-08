@@ -16,7 +16,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     lateinit var opponentBoardMessage: Message
     lateinit var boardMessage: Message
     lateinit var rollMessage: Message
-    lateinit var updateMessage: Message
+    private lateinit var updateMessage: Message
     val otherMessages = ArrayList<Message>()
     private var roll: Int = 0
 
@@ -32,8 +32,8 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         intArrayOf(0, 0, 0)
     )
 
-    fun getPiece(x: Int, y: Int) = board[y][x]
-    fun setPiece(x: Int, y: Int, piece: Int, quietChange: Boolean = false) {
+    private fun getPiece(x: Int, y: Int) = board[y][x]
+    private fun setPiece(x: Int, y: Int, piece: Int, quietChange: Boolean = false) {
         board[y][x] = piece
         if(!quietChange) boardChangeListener?.invoke(this)
     }
@@ -47,12 +47,12 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     //Returns true if we did destroy something
-    fun destroyPieces(column: Int, piece: Int): Boolean {
+    private fun destroyPieces(column: Int, piece: Int): Boolean {
         if(piece == 0) return false
         var didDestroy = false
         for (i in 0..2) {
             if (getPiece(column, i) == piece) {
-                //Quiet change, we dont want this to cause any updates by itself visually
+                //Quiet change, we don't want this to cause any updates by itself visually
                 setPiece(column, i, 0, true)
                 didDestroy = true
             }
@@ -91,7 +91,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         return totalScore
     }
 
-    fun calculateColumnScore(column: Int): Int {
+    private fun calculateColumnScore(column: Int): Int {
         val numbers = CopyOnWriteArrayList<Int>()
         for(i in 0..2) numbers.add(board[i][column])
 
@@ -149,7 +149,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         refreshUpdateMessage()
     }
 
-    fun renderBoard(width: Int, height: Int, mirrored: Boolean = false): BufferedImage {
+    private fun renderBoard(width: Int, height: Int, mirrored: Boolean = false): BufferedImage {
         val scoreSize = textHeight / 3
         return BufferedImage(width, height + scoreSize * 2, BufferedImage.TYPE_INT_ARGB).also {
             val g = it.graphics as Graphics2D
