@@ -17,7 +17,8 @@ object KBJoin: ICommand {
             MatchManager.Result.NOT_FOUND -> "Match not found!"
             MatchManager.Result.SELF_JOIN_ERROR -> "You cant join yourself!"
             MatchManager.Result.SUCCESS -> "Joined game!"
-            else -> "Bad response: ${response.result}"
+            MatchManager.Result.HAS_RUNNING_MATCH -> "You are already in a running match!"
+            MatchManager.Result.MATCH_FULL -> "Match is full!"
         }
         event.hook.editOriginal(message).queue()
     }

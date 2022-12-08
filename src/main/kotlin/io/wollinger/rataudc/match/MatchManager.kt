@@ -7,13 +7,15 @@ import kotlin.concurrent.thread
 
 
 object MatchManager {
-    enum class Result {SUCCESS, NOT_FOUND, SELF_JOIN_ERROR, HAS_RUNNING_MATCH}
+    enum class Result {SUCCESS, NOT_FOUND, SELF_JOIN_ERROR, HAS_RUNNING_MATCH, MATCH_FULL}
     class Response(val result: Result, val content: Any? = null)
 
     private val inviteMatches = HashMap<String, Match>()
     private val usersMatches = HashMap<Long, Match>()
     private var servicesStarted = false
 
+    //Starts the services
+    // MatchLastUpdateService -> Takes care of ending matches after x amount of time
     fun startServices() {
         if(servicesStarted) return
         servicesStarted = true
@@ -27,13 +29,14 @@ object MatchManager {
         }
     }
 
+    //Creates a match. Every match needs an invitation code + an initial user
     fun createInviteMatch(userID: Long, channel: MessageChannel): Response {
         if(usersMatches.containsKey(userID)) return Response(Result.HAS_RUNNING_MATCH)
 
         val inviteLink = Utils.getInviteLink(userID)
         Match().also {
             it.inviteLink = inviteLink
-            it.player1 = MatchPlayer(it, userID, channel)
+            it.addPlayer(MatchPlayer(it, userID, channel))
             inviteMatches[inviteLink] = it
             usersMatches[userID] = it
             println("Match created: Link($inviteLink) ${it.player1}")
@@ -47,9 +50,13 @@ object MatchManager {
 
     fun joinMatch(inviteLink: String, userID: Long, channel: MessageChannel): Response {
         if(!inviteMatches.containsKey(inviteLink)) return Response(Result.NOT_FOUND)
+        if(usersMatches.containsKey(userID)) return Response(Result.HAS_RUNNING_MATCH)
+
         inviteMatches[inviteLink]!!.also {
-            if(it.player1!!.userID == userID) return Response(Result.SELF_JOIN_ERROR)
-            it.player2 = MatchPlayer(it, userID, channel)
+            if(it.isFull()) return Response(Result.MATCH_FULL)
+            if(it.isInMatch(userID)) return Response(Result.SELF_JOIN_ERROR)
+
+            it.addPlayer(MatchPlayer(it, userID, channel))
             usersMatches[userID] = it
         }
         return Response(Result.SUCCESS)

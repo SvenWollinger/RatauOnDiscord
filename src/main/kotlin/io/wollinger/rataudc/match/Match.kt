@@ -133,4 +133,13 @@ class Match {
             e(player2)
         }
     }
+
+    fun addPlayer(player: MatchPlayer) {
+        if(player1 == null) player1 = player
+        else if(player2 == null) player2 = player
+    }
+
+    fun isInMatch(userID: Long) = userID == player1?.userID || userID == player2?.userID
+
+    fun isFull() = player1 != null && player2 != null
 }
