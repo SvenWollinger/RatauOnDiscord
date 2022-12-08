@@ -5,14 +5,20 @@ import java.lang.Exception
 import kotlin.concurrent.thread
 
 class Match {
-    enum class STATE { P1_TURN, P2_TURN }
+    enum class STATE { P1_TURN, P2_TURN, END }
 
-    private var state = if((0..1).random() == 0) STATE.P1_TURN else STATE.P2_TURN
+    var state = if((0..1).random() == 0) STATE.P1_TURN else STATE.P2_TURN
 
     fun isMyTurn(player: MatchPlayer): Boolean {
         if(state == STATE.P1_TURN && player.userID == player1!!.userID) return true
         if(state == STATE.P2_TURN && player.userID == player2!!.userID) return true
         return false
+    }
+
+    fun betterPlayer(): MatchPlayer? {
+        val sc1 = player1!!.calculateScore()
+        val sc2 = player2!!.calculateScore()
+        return if(sc1 == sc2) null else if(sc1 > sc2) player1!! else player2!!
     }
 
     private var timeout = 120000
@@ -73,6 +79,17 @@ class Match {
         refreshLastUpdated()
     }
 
+    fun isDone(): Boolean {
+        fun doneCheck(matchPlayer: MatchPlayer): Boolean {
+            var hasSpace = false
+            for(i in 0..2)
+                if(matchPlayer.hasSpace(i))
+                    hasSpace = true
+            return !hasSpace
+        }
+        return doneCheck(player1!!) || doneCheck(player2!!)
+    }
+
     private fun checkIfStart() {
         if(player1 != null && player2 != null) {
             fun setup(p1: MatchPlayer, p2: MatchPlayer) {
@@ -89,6 +106,12 @@ class Match {
                         p2.updateRollThing()
                         //If opponents board changed with our change update our own opponentMessage as well
                         if(didChangeOpponent) p1.updateOpponentBoard(p2)
+
+                        if(isDone() && state != STATE.END) {
+                            state = STATE.END
+                            p1.refreshUpdateMessage()
+                            p2.refreshUpdateMessage()
+                        }
                     }
                 }
             }

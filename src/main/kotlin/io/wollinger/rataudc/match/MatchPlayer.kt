@@ -126,7 +126,15 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     fun refreshUpdateMessage() {
-        val str = if(match.isMyTurn(this)) "Your turn" else ""
+        val str = if(match.state == Match.STATE.END) {
+            when (val won = match.betterPlayer()) {
+                null -> "Tie!"
+                this -> "You won!"
+                else -> "${won.username} won!"
+            }
+        } else {
+            if(match.isMyTurn(this)) "Your turn" else ""
+        }
         updateMessage.setImage(Utils.renderStringToImage(str, boardSize, textHeight / 2)).complete()
     }
 
