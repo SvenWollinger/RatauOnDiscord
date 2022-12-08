@@ -26,28 +26,25 @@ class Match {
     private fun refreshLastUpdated() = kotlin.run { lastUpdated = Utils.currentTime() }
 
     var inviteLink: String? = null
-    var player1: MatchPlayer? = null
+    private var player1: MatchPlayer? = null
         set(value) {
             field = value
             checkIfStart()
             refreshLastUpdated()
         }
-    var player2: MatchPlayer? = null
+    private var player2: MatchPlayer? = null
         set(value) {
             field = value
             checkIfStart()
             refreshLastUpdated()
         }
 
-    fun endGame() {
-        fun del(p: MatchPlayer) {
-            p.boardMessage.delete().queue()
-            p.opponentBoardMessage.delete().queue()
-            p.rollMessage.delete().queue()
-            p.otherMessages.forEach { it.delete().queue() }
+    private fun endGame() {
+        fun bye(p: MatchPlayer) {
+            MatchManager.leave(p.userID)
         }
-        del(player1!!)
-        del(player2!!)
+        bye(player1!!)
+        bye(player2!!)
     }
 
     fun handleMessage(playerID: Long, message: String) {
@@ -111,6 +108,7 @@ class Match {
                             state = STATE.END
                             p1.refreshUpdateMessage()
                             p2.refreshUpdateMessage()
+                            endGame()
                         }
                     }
                 }
@@ -127,7 +125,7 @@ class Match {
             fun e(p: MatchPlayer?) {
                 if(p == null) return
                 p.channel.sendMessage("No updates in a while. Killing match").queue()
-                MatchManager.leave(p.userID)
+                endGame()
             }
             e(player1)
             e(player2)
@@ -142,4 +140,6 @@ class Match {
     fun isInMatch(userID: Long) = userID == player1?.userID || userID == player2?.userID
 
     fun isFull() = player1 != null && player2 != null
+
+    override fun toString() = "Match(player1=$player1, player2=$player2, inviteLink=$inviteLink)"
 }

@@ -39,7 +39,7 @@ object MatchManager {
             it.addPlayer(MatchPlayer(it, userID, channel))
             inviteMatches[inviteLink] = it
             usersMatches[userID] = it
-            println("Match created: Link($inviteLink) ${it.player1}")
+            println("Match created: $it")
         }
         return Response(Result.SUCCESS, inviteLink)
     }
