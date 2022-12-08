@@ -1,10 +1,20 @@
 package io.wollinger.rataudc.match
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import io.wollinger.rataudc.Utils
 import java.lang.Exception
 import kotlin.concurrent.thread
 
 class Match {
+    enum class STATE { P1_TURN, P2_TURN }
+
+    private var state = if((0..1).random() == 0) STATE.P1_TURN else STATE.P2_TURN
+
+    fun isMyTurn(player: MatchPlayer): Boolean {
+        if(state == STATE.P1_TURN && player.userID == player1!!.userID) return true
+        if(state == STATE.P2_TURN && player.userID == player2!!.userID) return true
+        return false
+    }
 
     private var timeout = 120000
     private var lastUpdated: Long = Utils.currentTime()
@@ -37,15 +47,22 @@ class Match {
 
     fun buttonEvent(playerID: Long, buttonID: String) {
         val player = when(playerID) {
-            player1!!.userID -> player1
-            player2!!.userID -> player2
+            player1!!.userID -> if(state == STATE.P1_TURN) player1 else return
+            player2!!.userID -> if(state == STATE.P2_TURN) player2 else return
             else -> throw Exception("Bad id: $playerID")
         }!!
+
         when(buttonID) {
             "roll" -> player.roll()
-            "p1" -> player.addPiece(0)
-            "p2" -> player.addPiece(1)
-            "p3" -> player.addPiece(2)
+            "p1", "p2", "p3" -> {
+                val column = buttonID.replaceFirst("p", "").toInt()
+                player.addPiece(column)
+
+                if(state == STATE.P1_TURN) state = STATE.P2_TURN
+                else if(state == STATE.P2_TURN) state = STATE.P1_TURN
+                player1!!.refreshUpdateMessage()
+                player2!!.refreshUpdateMessage()
+            }
         }
         refreshLastUpdated()
     }

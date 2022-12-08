@@ -16,6 +16,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     lateinit var opponentBoardMessage: Message
     lateinit var boardMessage: Message
     lateinit var rollMessage: Message
+    lateinit var updateMessage: Message
     val otherMessages = ArrayList<Message>()
     private var roll: Int = 0
 
@@ -123,15 +124,20 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         updateRollThing()
     }
 
+    fun refreshUpdateMessage() {
+        val str = if(match.isMyTurn(this)) "Your turn" else ""
+        updateMessage.setImage(Utils.renderStringToImage(str, boardSize, textHeight / 2)).complete()
+    }
+
     fun setupBoard(opponent: MatchPlayer) {
         otherMessages.add(channel.sendMessage("$username VS ${opponent.username}").complete())
         otherMessages.add(channel.sendFiles(Utils.renderStringToImage(opponent.username, boardSize, textHeight).toFileUpload()).complete())
         opponentBoardMessage = channel.sendFiles(opponent.renderBoard(boardSize, boardSize, true).toFileUpload()).complete()
-        otherMessages.add(channel.sendFiles(Utils.renderStringToImage("", boardSize, textHeight / 2).toFileUpload()).complete())
+        updateMessage = channel.sendFiles(Utils.renderStringToImage("", boardSize, textHeight / 2).toFileUpload()).complete()
         boardMessage = channel.sendFiles(renderBoard(boardSize, boardSize).toFileUpload()).complete()
-        //otherMessages.add(channel.sendFiles(Utils.renderStringToImage("Your roll:", 128, textHeight).toFileUpload()).complete())
         rollMessage = channel.sendMessage("roll").complete()
         updateRollThing()
+        refreshUpdateMessage()
     }
 
     fun renderBoard(width: Int, height: Int, mirrored: Boolean = false): BufferedImage {
