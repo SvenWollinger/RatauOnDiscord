@@ -8,7 +8,7 @@ class Match {
 
     private var timeout = 120000
     private var lastUpdated: Long = Utils.currentTime()
-    fun refreshLastUpdated() = kotlin.run { lastUpdated = Utils.currentTime() }
+    private fun refreshLastUpdated() = kotlin.run { lastUpdated = Utils.currentTime() }
 
     var inviteLink: String? = null
     var player1: MatchPlayer? = null
