@@ -61,6 +61,12 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         }
     }
 
+    fun calculateScore(): Int {
+        var totalScore = 0
+        for(i in 0..2) totalScore += calculateColumnScore(i)
+        return totalScore
+    }
+
     fun calculateColumnScore(column: Int): Int {
         val numbers = CopyOnWriteArrayList<Int>()
         for(i in 0..2) numbers.add(board[i][column])
@@ -107,7 +113,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
 
     fun renderBoard(width: Int, height: Int, mirrored: Boolean = false): BufferedImage {
         val scoreSize = textHeight / 3
-        return BufferedImage(width, height + scoreSize, BufferedImage.TYPE_INT_ARGB).also {
+        return BufferedImage(width, height + scoreSize * 2, BufferedImage.TYPE_INT_ARGB).also {
             val g = it.graphics as Graphics2D
             g.antialise()
             val cellWidth = width / 3
@@ -119,15 +125,17 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
             }
 
             if(!mirrored) {
-                r(0, 0, calculateColumnScore(0))
-                r(cellWidth, 0, calculateColumnScore(1))
-                r(cellWidth * 2, 0, calculateColumnScore(2))
+                g.drawImage(Utils.renderStringToImage(calculateScore().toString(), width, scoreSize), 0, 0, null)
+
+                r(0, scoreSize, calculateColumnScore(0))
+                r(cellWidth, scoreSize, calculateColumnScore(1))
+                r(cellWidth * 2, scoreSize, calculateColumnScore(2))
             }
 
             for(y in 0 until 3) {
                 for(x in 0 until 3) {
                     val piece = if(!mirrored) getPiece(x, y) else getPiece(x, 2 - y)
-                    val addX = if(!mirrored) scoreSize else 0
+                    val addX = if(!mirrored) scoreSize * 2 else 0
                     g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight), x * cellWidth, y * cellHeight + addX, null)
                 }
             }
@@ -136,6 +144,8 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
                 r(0, height, calculateColumnScore(0))
                 r(cellWidth, height, calculateColumnScore(1))
                 r(cellWidth * 2, height, calculateColumnScore(2))
+
+                g.drawImage(Utils.renderStringToImage(calculateScore().toString(), width, scoreSize), 0, height + scoreSize, null)
             }
         }
     }
