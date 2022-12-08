@@ -3,7 +3,6 @@ package io.wollinger.rataudc.commands
 import io.wollinger.rataudc.match.MatchManager
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.Commands
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 
 object KBLeave: ICommand {
     override val label = "kb-leave"
@@ -18,7 +17,5 @@ object KBLeave: ICommand {
         event.reply(message).setEphemeral(true).queue()
     }
 
-    override fun getSlashCommand(): SlashCommandData {
-        return Commands.slash(label, "Leave your current match")
-    }
+    override fun getSlashCommand() = Commands.slash(label, "Leave your current match")
 }

@@ -4,7 +4,6 @@ import io.wollinger.rataudc.match.MatchManager
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 
 object KBJoin: ICommand {
     override val label = "kb-join"
@@ -23,9 +22,7 @@ object KBJoin: ICommand {
         event.hook.editOriginal(message).queue()
     }
 
-    override fun getSlashCommand(): SlashCommandData {
-        return Commands.slash(label, "Join someones knucklebone match").also {
-            it.addOption(OptionType.STRING, "invite-link", "Invite link", true)
-        }
+    override fun getSlashCommand() =  Commands.slash(label, "Join someones knucklebone match").also {
+        it.addOption(OptionType.STRING, "invite-link", "Invite link", true)
     }
 }
