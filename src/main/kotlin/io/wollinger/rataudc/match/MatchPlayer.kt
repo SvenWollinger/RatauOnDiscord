@@ -108,7 +108,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         return sum
     }
 
-    private fun updateRollThing() {
+    fun updateRollThing() {
         fun b(btn: Button, b: Boolean) = if(b) btn else btn.asDisabled()
         rollMessage.setImage(Utils.renderDiceWithBG(roll, rollThingWidth, textHeight)).setContent("").setActionRow(
             b(Button.secondary("${match.inviteLink}-${userID}-roll", Emoji.fromUnicode("\uD83C\uDFB2")), roll == 0),

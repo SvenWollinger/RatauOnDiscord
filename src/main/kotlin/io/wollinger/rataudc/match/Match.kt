@@ -63,6 +63,7 @@ class Match {
                         //Update said opponents boards message
                         p2.updateOpponentBoard(p1)
                         p2.updateBoard()
+                        p2.updateRollThing()
                         //If opponents board changed with our change update our own opponentMessage as well
                         if(didChangeOpponent) p1.updateOpponentBoard(p2)
                     }
