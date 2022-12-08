@@ -45,6 +45,29 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         boardMessage.setImage(renderBoard(boardSize, boardSize)).queue()
     }
 
+    //Returns true if we did destroy something
+    fun destroyPieces(column: Int, piece: Int): Boolean {
+        var didDestroy = false
+        for (i in 0..2) {
+            if (board[i][column] == piece) {
+                board[i][column] = 0
+                didDestroy = true
+            }
+        }
+        return didDestroy
+    }
+
+    fun updateFromOpponent(opponent: MatchPlayer): Boolean {
+        var didDestroy = false
+        for(x in 0..2) {
+            for(y in 0..2) {
+                if(destroyPieces(y, opponent.getPiece(x, y)))
+                    didDestroy = true
+            }
+        }
+        return didDestroy
+    }
+
     fun hasSpace(column: Int) = getPiece(column, 0) == 0 || getPiece(column, 1) == 0 || getPiece(column, 2) == 0
     fun addPiece(column: Int) {
         if(roll == 0) return
@@ -94,7 +117,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     fun roll() {
-        roll = (1..6).random()
+        roll = 4//(1..6).random()
         updateRollThing()
     }
 

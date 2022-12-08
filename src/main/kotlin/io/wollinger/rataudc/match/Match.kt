@@ -49,20 +49,22 @@ class Match {
 
     private fun checkIfStart() {
         if(player1 != null && player2 != null) {
-            thread {
-                Thread.currentThread().name = "InitBoard-$player1"
-                player1!!.setupBoard(player2!!)
-                player1!!.boardChangeListener = {
-                    player2!!.updateOpponentBoard(player1!!)
+            fun setup(p1: MatchPlayer, p2: MatchPlayer) {
+                thread {
+                    Thread.currentThread().name = "InitBoard-$p1-$p2"
+                    p1.setupBoard(p2)
+                    p1.boardChangeListener = {
+                        //Update opponent with our new board and check if there have been any updates
+                        val didChangeOpponent = p2.updateFromOpponent(p1)
+                        //Update said opponents boards message
+                        p2.updateOpponentBoard(p1)
+                        //If opponents board changed with our change update our own opponentMessage as well
+                        if(didChangeOpponent) p1.updateOpponentBoard(p2)
+                    }
                 }
             }
-            thread {
-                Thread.currentThread().name = "InitBoard-$player2"
-                player2!!.setupBoard(player1!!)
-                player2!!.boardChangeListener = {
-                    player1!!.updateOpponentBoard(player2!!)
-                }
-            }
+            setup(player1!!, player2!!)
+            setup(player2!!, player1!!)
         }
     }
 
