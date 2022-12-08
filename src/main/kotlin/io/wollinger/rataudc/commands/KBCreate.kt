@@ -15,7 +15,7 @@ object KBCreate: ICommand {
             MatchManager.Result.HAS_RUNNING_MATCH -> "You already have a running match!"
             else -> "Bad response: ${response.result}"
         }
-        event.reply(message).queue()
+        event.reply(message).setEphemeral(true).queue()
     }
 
     override fun getSlashCommand(): SlashCommandData {

@@ -15,7 +15,7 @@ object KBLeave: ICommand {
             MatchManager.Result.NOT_FOUND -> "Not in an active match"
             else -> "Bad response: ${response.result}"
         }
-        event.reply(message).queue()
+        event.reply(message).setEphemeral(true).queue()
     }
 
     override fun getSlashCommand(): SlashCommandData {
