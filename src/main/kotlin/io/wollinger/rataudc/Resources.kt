@@ -6,6 +6,6 @@ import javax.imageio.ImageIO
 
 object Resources {
     val dice = Array<BufferedImage>(6) { ImageIO.read(Resources::class.java.getResource("/dice${it + 1}.png")) }
-    val bg = ImageIO.read(Resources::class.java.getResource("/bg.png"))
-    val font = Font.createFont(Font.TRUETYPE_FONT, Resources::class.java.getResourceAsStream("/Eczar SemiBold 600.ttf"))
+    val bg: BufferedImage = ImageIO.read(Resources::class.java.getResource("/bg.png"))
+    val font: Font = Font.createFont(Font.TRUETYPE_FONT, Resources::class.java.getResourceAsStream("/Eczar SemiBold 600.ttf"))
 }

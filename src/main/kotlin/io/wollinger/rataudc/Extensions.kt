@@ -18,8 +18,8 @@ fun BufferedImage.toFileUpload(): FileUpload {
 }
 
 fun Graphics2D.antialise() {
-    this.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-    this.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+    setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
 }
 
 fun Message.setImage(image: BufferedImage): MessageEditAction = editMessage(MessageEditData.fromFiles(image.toFileUpload()))
