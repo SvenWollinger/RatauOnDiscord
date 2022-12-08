@@ -41,6 +41,8 @@ object MatchManager {
         return Response(Result.SUCCESS, inviteLink)
     }
 
+    fun getUserMatch(userID: Long): Match? = usersMatches[userID]
+
     fun getMatch(inviteLink: String): Match? = inviteMatches[inviteLink]
 
     fun joinMatch(inviteLink: String, userID: Long, channel: MessageChannel): Response {

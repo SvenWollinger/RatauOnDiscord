@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.ArrayList
 
 class MatchPlayer(private val match: Match, val userID: Long, val channel: MessageChannel) {
-    private var username = Ratau.jda.retrieveUserById(userID).complete().name
+    val username = Ratau.jda.retrieveUserById(userID).complete().name
     lateinit var opponentBoardMessage: Message
     lateinit var boardMessage: Message
     lateinit var rollMessage: Message

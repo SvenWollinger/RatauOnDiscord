@@ -44,6 +44,11 @@ class Match {
         del(player2!!)
     }
 
+    fun handleMessage(playerID: Long, message: String) {
+        if(player1!!.userID == playerID) player2!!.channel.sendMessage("${player1!!.username}: $message").queue()
+        if(player2!!.userID == playerID) player1!!.channel.sendMessage("${player2!!.username}: $message").queue()
+    }
+
     fun buttonEvent(playerID: Long, buttonID: String) {
         val player = when(playerID) {
             player1!!.userID -> if(state == STATE.P1_TURN || buttonID == "roll") player1 else return
