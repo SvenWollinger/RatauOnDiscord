@@ -1,5 +1,6 @@
 package io.wollinger.rataudc
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
@@ -25,7 +26,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     private val textHeight = 64
     private val rollThingWidth = 96
 
-    private var changeListener: ((MatchPlayer) -> Unit)? = null
+    var boardChangeListener: ((MatchPlayer) -> Unit)? = null
 
     private var board = arrayOf(
         intArrayOf(0, 0, 0),
@@ -36,7 +37,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     fun getPiece(x: Int, y: Int) = board[y][x]
     fun setPiece(x: Int, y: Int, piece: Int) {
         board[y][x] = piece
-        changeListener?.invoke(this)
+        boardChangeListener?.invoke(this)
     }
 
     fun updateOpponentBoard(opponent: MatchPlayer) {
@@ -150,10 +151,6 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         }
     }
 
-    fun setBoardChangeListener(action: (MatchPlayer) -> Unit) {
-        changeListener = action
-    }
-
     override fun toString() = "MatchPlayer(name=$username, id=$userID)"
 }
 
@@ -205,14 +202,14 @@ class Match {
             thread {
                 Thread.currentThread().name = "InitBoard-$player1"
                 player1!!.setupBoard(player2!!)
-                player1!!.setBoardChangeListener {
+                player1!!.boardChangeListener = {
                     player2!!.updateOpponentBoard(player1!!)
                 }
             }
             thread {
                 Thread.currentThread().name = "InitBoard-$player2"
                 player2!!.setupBoard(player1!!)
-                player2!!.setBoardChangeListener {
+                player2!!.boardChangeListener = {
                     player1!!.updateOpponentBoard(player2!!)
                 }
             }
