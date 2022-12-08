@@ -8,18 +8,20 @@ class Match {
 
     private var timeout = 120000
     private var lastUpdated: Long = Utils.currentTime()
+    fun refreshLastUpdated() = kotlin.run { lastUpdated = Utils.currentTime() }
+
     var inviteLink: String? = null
     var player1: MatchPlayer? = null
         set(value) {
             field = value
             checkIfStart()
-            lastUpdated = Utils.currentTime()
+            refreshLastUpdated()
         }
     var player2: MatchPlayer? = null
         set(value) {
             field = value
             checkIfStart()
-            lastUpdated = Utils.currentTime()
+            refreshLastUpdated()
         }
 
     fun endGame() {
@@ -45,6 +47,7 @@ class Match {
             "p2" -> player.addPiece(1)
             "p3" -> player.addPiece(2)
         }
+        refreshLastUpdated()
     }
 
     private fun checkIfStart() {
@@ -54,6 +57,7 @@ class Match {
                     Thread.currentThread().name = "InitBoard-$p1-$p2"
                     p1.setupBoard(p2)
                     p1.boardChangeListener = {
+                        refreshLastUpdated()
                         //Update opponent with our new board and check if there have been any updates
                         val didChangeOpponent = p2.updateFromOpponent(p1)
                         //Update said opponents boards message
@@ -66,6 +70,7 @@ class Match {
             }
             setup(player1!!, player2!!)
             setup(player2!!, player1!!)
+            refreshLastUpdated()
         }
     }
 
