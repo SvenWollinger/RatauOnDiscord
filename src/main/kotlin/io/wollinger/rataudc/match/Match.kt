@@ -1,6 +1,5 @@
 package io.wollinger.rataudc.match
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import io.wollinger.rataudc.Utils
 import java.lang.Exception
 import kotlin.concurrent.thread
