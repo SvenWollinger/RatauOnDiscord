@@ -1,18 +1,15 @@
-package io.wollinger.rataudc
+package io.wollinger.rataudc.match
 
-import com.sun.org.apache.xpath.internal.operations.Bool
+import io.wollinger.rataudc.*
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
-import java.lang.Exception
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.concurrent.thread
 
 class MatchPlayer(private val match: Match, val userID: Long, val channel: MessageChannel) {
     private var username = Ratau.jda.retrieveUserById(userID).complete().name
@@ -152,137 +149,4 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     override fun toString() = "MatchPlayer(name=$username, id=$userID)"
-}
-
-class Match {
-
-    private var timeout = 120000
-    private var lastUpdated: Long = Utils.currentTime()
-    var inviteLink: String? = null
-    var player1: MatchPlayer? = null
-        set(value) {
-            field = value
-            checkIfStart()
-            lastUpdated = Utils.currentTime()
-        }
-    var player2: MatchPlayer? = null
-        set(value) {
-            field = value
-            checkIfStart()
-            lastUpdated = Utils.currentTime()
-        }
-
-    fun endGame() {
-        fun del(p: MatchPlayer) {
-            p.boardMessage.delete().queue()
-            p.opponentBoardMessage.delete().queue()
-            p.rollMessage.delete().queue()
-            p.otherMessages.forEach { it.delete().queue() }
-        }
-        del(player1!!)
-        del(player2!!)
-    }
-
-    fun buttonEvent(playerID: Long, buttonID: String) {
-        val player = when(playerID) {
-            player1!!.userID -> player1
-            player2!!.userID -> player2
-            else -> throw Exception("Bad id: $playerID")
-        }!!
-        when(buttonID) {
-            "roll" -> player.roll()
-            "p1" -> player.addPiece(0)
-            "p2" -> player.addPiece(1)
-            "p3" -> player.addPiece(2)
-        }
-    }
-
-    private fun checkIfStart() {
-        if(player1 != null && player2 != null) {
-            thread {
-                Thread.currentThread().name = "InitBoard-$player1"
-                player1!!.setupBoard(player2!!)
-                player1!!.boardChangeListener = {
-                    player2!!.updateOpponentBoard(player1!!)
-                }
-            }
-            thread {
-                Thread.currentThread().name = "InitBoard-$player2"
-                player2!!.setupBoard(player1!!)
-                player2!!.boardChangeListener = {
-                    player1!!.updateOpponentBoard(player2!!)
-                }
-            }
-        }
-    }
-
-    fun checkLastUpdated() {
-        val timePassed = Utils.currentTime() - lastUpdated
-        if(timePassed >= timeout) {
-            fun e(p: MatchPlayer?) {
-                if(p == null) return
-                p.channel.sendMessage("No updates in a while. Killing match").queue()
-                MatchManager.leave(p.userID)
-            }
-            e(player1)
-            e(player2)
-        }
-    }
-}
-
-object MatchManager {
-    enum class Result {SUCCESS, NOT_FOUND, SELF_JOIN_ERROR, HAS_RUNNING_MATCH}
-    class Response(val result: Result, val content: Any? = null)
-
-    private val inviteMatches = HashMap<String, Match>()
-    private val usersMatches = HashMap<Long, Match>()
-    private var servicesStarted = false
-
-    fun startServices() {
-        if(servicesStarted) return
-        servicesStarted = true
-
-        thread {
-            Thread.currentThread().name = "MatchLastUpdateService"
-            while(true) {
-                inviteMatches.forEach { (_, u) -> u.checkLastUpdated() }
-                Thread.sleep(1000)
-            }
-        }
-    }
-
-    fun createInviteMatch(userID: Long, channel: MessageChannel): Response {
-        if(usersMatches.containsKey(userID)) return Response(Result.HAS_RUNNING_MATCH)
-
-        val inviteLink = Utils.getInviteLink(userID)
-        Match().also {
-            it.inviteLink = inviteLink
-            it.player1 = MatchPlayer(it, userID, channel)
-            inviteMatches[inviteLink] = it
-            usersMatches[userID] = it
-            println("Match created: Link($inviteLink) ${it.player1}")
-        }
-        return Response(Result.SUCCESS, inviteLink)
-    }
-
-    fun getMatch(inviteLink: String): Match? = inviteMatches[inviteLink]
-
-    fun joinMatch(inviteLink: String, userID: Long, channel: MessageChannel): Response {
-        if(!inviteMatches.containsKey(inviteLink)) return Response(Result.NOT_FOUND)
-        inviteMatches[inviteLink]!!.also {
-            if(it.player1!!.userID == userID) return Response(Result.SELF_JOIN_ERROR)
-            it.player2 = MatchPlayer(it, userID, channel)
-            usersMatches[userID] = it
-        }
-        return Response(Result.SUCCESS)
-    }
-
-    fun leave(userID: Long): Response {
-        usersMatches[userID]?.also {
-            usersMatches.remove(userID)
-            inviteMatches.remove(it.inviteLink)
-            return Response(Result.SUCCESS)
-        }
-        return Response(Result.NOT_FOUND)
-    }
 }

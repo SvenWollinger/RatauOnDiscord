@@ -1,6 +1,6 @@
 package io.wollinger.rataudc.commands
 
-import io.wollinger.rataudc.MatchManager
+import io.wollinger.rataudc.match.MatchManager
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands

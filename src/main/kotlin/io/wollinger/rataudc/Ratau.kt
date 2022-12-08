@@ -1,6 +1,7 @@
 package io.wollinger.rataudc
 
 import io.wollinger.rataudc.commands.*
+import io.wollinger.rataudc.match.MatchManager
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
