@@ -61,7 +61,11 @@ object Ratau: ListenerAdapter() {
         val parts = event.componentId.split("-")
         if(parts.size < 3) return
 
-        MatchManager.getMatch(parts[0])?.buttonEvent(parts[1].toLong(), parts[2])
+        val intendedID = parts[1].toLong()
+        //Only allow the user the button is meant to to use it
+        if(intendedID != event.user.idLong) return
+
+        MatchManager.getMatch(parts[0])?.buttonEvent(intendedID, parts[2])
     }
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
