@@ -5,8 +5,10 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.buttons.Button
+import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
+import java.lang.Exception
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.ArrayList
@@ -89,6 +91,19 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         var totalScore = 0
         for(i in 0..2) totalScore += calculateColumnScore(i)
         return totalScore
+    }
+
+    private fun getPieceColor(column: Int, piece: Int): Color? {
+        if(piece == 0) return null
+        val numbers = CopyOnWriteArrayList<Int>()
+        for(i in 0..2) numbers.add(board[i][column])
+
+        return when(Collections.frequency(numbers, piece)) {
+            1 -> null
+            2 -> Color(255, 255, 0, 100)
+            3 -> Color(0, 0, 255, 100)
+            else -> throw Exception(":(")
+        }
     }
 
     private fun calculateColumnScore(column: Int): Int {
@@ -174,7 +189,8 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
                 for(x in 0 until 3) {
                     val piece = if(!mirrored) getPiece(x, y) else getPiece(x, 2 - y)
                     val addX = if(!mirrored) scoreSize * 2 else 0
-                    g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight), x * cellWidth, y * cellHeight + addX, null)
+                    val color = getPieceColor(x, piece)
+                    g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight, color), x * cellWidth, y * cellHeight + addX, null)
                 }
             }
 
