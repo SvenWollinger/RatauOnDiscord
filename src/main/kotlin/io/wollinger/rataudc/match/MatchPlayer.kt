@@ -111,11 +111,12 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
 
     fun updateRollThing() {
         fun b(btn: Button, b: Boolean) = if(b) btn else btn.asDisabled()
+        val isOurTurn = match.isMyTurn(this)
         rollMessage.setImage(Utils.renderDiceWithBG(roll, rollThingWidth, textHeight)).setContent("").setActionRow(
             b(Button.secondary("${match.inviteLink}-${userID}-roll", Emoji.fromUnicode("\uD83C\uDFB2")), roll == 0),
-            b(Button.secondary("${match.inviteLink}-${userID}-p1", Emoji.fromUnicode("1️⃣")), roll != 0 && hasSpace(0)),
-            b(Button.secondary("${match.inviteLink}-${userID}-p2", Emoji.fromUnicode("2️⃣")), roll != 0 && hasSpace(1)),
-            b(Button.secondary("${match.inviteLink}-${userID}-p3", Emoji.fromUnicode("3️⃣")), roll != 0 && hasSpace(2))
+            b(Button.secondary("${match.inviteLink}-${userID}-p1", Emoji.fromUnicode("1️⃣")), roll != 0 && hasSpace(0) && isOurTurn),
+            b(Button.secondary("${match.inviteLink}-${userID}-p2", Emoji.fromUnicode("2️⃣")), roll != 0 && hasSpace(1) && isOurTurn),
+            b(Button.secondary("${match.inviteLink}-${userID}-p3", Emoji.fromUnicode("3️⃣")), roll != 0 && hasSpace(2) && isOurTurn)
         ).complete()
     }
 

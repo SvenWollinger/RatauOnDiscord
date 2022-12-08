@@ -47,21 +47,23 @@ class Match {
 
     fun buttonEvent(playerID: Long, buttonID: String) {
         val player = when(playerID) {
-            player1!!.userID -> if(state == STATE.P1_TURN) player1 else return
-            player2!!.userID -> if(state == STATE.P2_TURN) player2 else return
+            player1!!.userID -> if(state == STATE.P1_TURN || buttonID == "roll") player1 else return
+            player2!!.userID -> if(state == STATE.P2_TURN || buttonID == "roll") player2 else return
             else -> throw Exception("Bad id: $playerID")
         }!!
 
         when(buttonID) {
             "roll" -> player.roll()
             "p1", "p2", "p3" -> {
-                val column = buttonID.replaceFirst("p", "").toInt()
+                val column = buttonID.replaceFirst("p", "").toInt() - 1
                 player.addPiece(column)
 
                 if(state == STATE.P1_TURN) state = STATE.P2_TURN
                 else if(state == STATE.P2_TURN) state = STATE.P1_TURN
                 player1!!.refreshUpdateMessage()
+                player1!!.updateRollThing()
                 player2!!.refreshUpdateMessage()
+                player2!!.updateRollThing()
             }
         }
         refreshLastUpdated()
