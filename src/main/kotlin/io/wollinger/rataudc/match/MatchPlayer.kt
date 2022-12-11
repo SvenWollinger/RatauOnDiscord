@@ -15,30 +15,17 @@ import kotlin.collections.ArrayList
 
 class MatchPlayer(private val match: Match, val userID: Long, val channel: MessageChannel) {
     val username = Ratau.jda.retrieveUserById(userID).complete().name
-    lateinit var opponentBoardMessage: Message
-    lateinit var boardMessage: Message
-    lateinit var rollMessage: Message
+    private lateinit var opponentBoardMessage: Message
+    private lateinit var boardMessage: Message
+    private lateinit var rollMessage: Message
     private lateinit var updateMessage: Message
-    val otherMessages = ArrayList<Message>()
+    private val otherMessages = ArrayList<Message>()
     private var roll: Int = 0
 
     private val boardSize = 256
     private val textHeight = 64
     private val rollThingWidth = 96
-
-    var boardChangeListener: ((MatchPlayer) -> Unit)? = null
-
-    private var board = arrayOf(
-        intArrayOf(0, 0, 0),
-        intArrayOf(0, 0, 0),
-        intArrayOf(0, 0, 0)
-    )
-
-    private fun getPiece(x: Int, y: Int) = board[y][x]
-    private fun setPiece(x: Int, y: Int, piece: Int, quietChange: Boolean = false) {
-        board[y][x] = piece
-        if(!quietChange) boardChangeListener?.invoke(this)
-    }
+    val board = MatchBoard()
 
     fun updateOpponentBoard(opponent: MatchPlayer) {
         opponentBoardMessage.setImage(opponent.renderBoard(boardSize, boardSize, true)).queue()
@@ -48,55 +35,29 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         boardMessage.setImage(renderBoard(boardSize, boardSize)).queue()
     }
 
-    //Returns true if we did destroy something
-    private fun destroyPieces(column: Int, piece: Int): Boolean {
-        if(piece == 0) return false
-        var didDestroy = false
-        for (i in 0..2) {
-            if (getPiece(column, i) == piece) {
-                //Quiet change, we don't want this to cause any updates by itself visually
-                setPiece(column, i, 0, true)
-                didDestroy = true
-            }
-        }
-        return didDestroy
-    }
-
     fun updateFromOpponent(opponent: MatchPlayer): Boolean {
         var didDestroy = false
         for(x in 0..2) {
             for(y in 0..2) {
-                if(destroyPieces(x, opponent.getPiece(x, y)))
+                if(board.destroyPieces(x, opponent.board.getPiece(x, y)))
                     didDestroy = true
             }
         }
         return didDestroy
     }
 
-    fun hasSpace(column: Int) = getPiece(column, 0) == 0 || getPiece(column, 1) == 0 || getPiece(column, 2) == 0
     fun addPiece(column: Int) {
-        if(roll == 0) return
-
-        for(y in 0..2) {
-            if(getPiece(column, y) == 0 && roll != 0) {
-                setPiece(column, y, roll)
-                roll = 0
-                updateBoard()
-                updateRollThing()
-            }
+        if(board.addPiece(column, roll)) {
+            roll = 0
+            updateBoard()
+            updateRollThing()
         }
-    }
-
-    fun calculateScore(): Int {
-        var totalScore = 0
-        for(i in 0..2) totalScore += calculateColumnScore(i)
-        return totalScore
     }
 
     private fun getPieceColor(column: Int, piece: Int): Color? {
         if(piece == 0) return null
         val numbers = CopyOnWriteArrayList<Int>()
-        for(i in 0..2) numbers.add(board[i][column])
+        for(i in 0..2) numbers.add(board.getPiece(column, i))
 
         return when(Collections.frequency(numbers, piece)) {
             1 -> null
@@ -106,32 +67,14 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         }
     }
 
-    private fun calculateColumnScore(column: Int): Int {
-        val numbers = CopyOnWriteArrayList<Int>()
-        for(i in 0..2) numbers.add(board[i][column])
-
-        var sum = 0
-        for(i in numbers) {
-            when(Collections.frequency(numbers, i)) {
-                1 -> sum += i
-                2 ->  {
-                    sum += i * 4
-                    repeat(2) { numbers.remove(i) }
-                }
-                3 -> return i * 3 * 3
-            }
-        }
-        return sum
-    }
-
     fun updateRollThing() {
         fun b(btn: Button, b: Boolean) = if(b) btn else btn.asDisabled()
         val isOurTurn = match.isMyTurn(this)
         rollMessage.setImage(Utils.renderDiceWithBG(roll, rollThingWidth, textHeight)).setContent("").setActionRow(
             b(Button.secondary("${match.inviteLink}-${userID}-roll", Emoji.fromUnicode("\uD83C\uDFB2")), roll == 0),
-            b(Button.secondary("${match.inviteLink}-${userID}-p1", Emoji.fromUnicode("1️⃣")), roll != 0 && hasSpace(0) && isOurTurn),
-            b(Button.secondary("${match.inviteLink}-${userID}-p2", Emoji.fromUnicode("2️⃣")), roll != 0 && hasSpace(1) && isOurTurn),
-            b(Button.secondary("${match.inviteLink}-${userID}-p3", Emoji.fromUnicode("3️⃣")), roll != 0 && hasSpace(2) && isOurTurn)
+            b(Button.secondary("${match.inviteLink}-${userID}-p1", Emoji.fromUnicode("1️⃣")), roll != 0 && board.hasSpace(0) && isOurTurn),
+            b(Button.secondary("${match.inviteLink}-${userID}-p2", Emoji.fromUnicode("2️⃣")), roll != 0 && board.hasSpace(1) && isOurTurn),
+            b(Button.secondary("${match.inviteLink}-${userID}-p3", Emoji.fromUnicode("3️⃣")), roll != 0 && board.hasSpace(2) && isOurTurn)
         ).complete()
     }
 
@@ -172,22 +115,22 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
             val cellWidth = width / 3
             val cellHeight = height / 3
 
-            fun r(x: Int, y: Int, str: Int) {
-                val i = Utils.renderStringToImage(str.toString(), cellWidth, scoreSize)
+            fun r(x: Int, y: Int, column: Int) {
+                val i = Utils.renderStringToImage(board.calculateColumnScore(column).toString(), cellWidth, scoreSize)
                 g.drawImage(i, x, y, null)
             }
 
             if(!mirrored) {
-                g.drawImage(Utils.renderStringToImage(calculateScore().toString(), width, scoreSize), 0, 0, null)
+                g.drawImage(Utils.renderStringToImage(board.calculateScore().toString(), width, scoreSize), 0, 0, null)
 
-                r(0, scoreSize, calculateColumnScore(0))
-                r(cellWidth, scoreSize, calculateColumnScore(1))
-                r(cellWidth * 2, scoreSize, calculateColumnScore(2))
+                r(0, scoreSize, 0)
+                r(cellWidth, scoreSize, 1)
+                r(cellWidth * 2, scoreSize, 2)
             }
 
             for(y in 0 until 3) {
                 for(x in 0 until 3) {
-                    val piece = if(!mirrored) getPiece(x, y) else getPiece(x, 2 - y)
+                    val piece = if(!mirrored) board.getPiece(x, y) else board.getPiece(x, 2 - y)
                     val addX = if(!mirrored) scoreSize * 2 else 0
                     val color = getPieceColor(x, piece)
                     g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight, color), x * cellWidth, y * cellHeight + addX, null)
@@ -195,11 +138,11 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
             }
 
             if(mirrored) {
-                r(0, height, calculateColumnScore(0))
-                r(cellWidth, height, calculateColumnScore(1))
-                r(cellWidth * 2, height, calculateColumnScore(2))
+                r(0, height, 0)
+                r(cellWidth, height, 1)
+                r(cellWidth * 2, height, 2)
 
-                g.drawImage(Utils.renderStringToImage(calculateScore().toString(), width, scoreSize), 0, height + scoreSize, null)
+                g.drawImage(Utils.renderStringToImage(board.calculateScore().toString(), width, scoreSize), 0, height + scoreSize, null)
             }
         }
     }

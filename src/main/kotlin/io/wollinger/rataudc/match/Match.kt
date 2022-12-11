@@ -16,8 +16,8 @@ class Match {
     }
 
     fun betterPlayer(): MatchPlayer? {
-        val sc1 = player1!!.calculateScore()
-        val sc2 = player2!!.calculateScore()
+        val sc1 = player1!!.board.calculateScore()
+        val sc2 = player2!!.board.calculateScore()
         return if(sc1 == sc2) null else if(sc1 > sc2) player1!! else player2!!
     }
 
@@ -89,11 +89,11 @@ class Match {
         refreshLastUpdated()
     }
 
-    fun isDone(): Boolean {
+    private fun isDone(): Boolean {
         fun doneCheck(matchPlayer: MatchPlayer): Boolean {
             var hasSpace = false
             for(i in 0..2)
-                if(matchPlayer.hasSpace(i))
+                if(matchPlayer.board.hasSpace(i))
                     hasSpace = true
             return !hasSpace
         }
@@ -106,7 +106,7 @@ class Match {
                 thread {
                     Thread.currentThread().name = "InitBoard-$p1-$p2"
                     p1.setupBoard(p2)
-                    p1.boardChangeListener = {
+                    p1.board.changeListener = {
                         refreshLastUpdated()
                         //Update opponent with our new board and check if there have been any updates
                         val didChangeOpponent = p2.updateFromOpponent(p1)
