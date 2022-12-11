@@ -60,9 +60,15 @@ class Match {
         bye(player2)
     }
 
-    fun handleMessage(playerID: Long, message: String) {
-        if(player1!!.userID == playerID) player2!!.channel.sendMessage("${player1!!.username}: $message").queue()
-        if(player2!!.userID == playerID) player1!!.channel.sendMessage("${player2!!.username}: $message").queue()
+    //Returns true if sent
+    fun handleMessage(playerID: Long, message: String): Boolean {
+        fun s(p: MatchPlayer, o: MatchPlayer): Boolean {
+            if(p.userID != playerID) return false
+            o.channel.sendMessage("${player1!!.username}: $message").queue()
+            return true
+        }
+        if(!isFull()) return false
+        return s(player1!!, player2!!) || s(player2!!, player1!!)
     }
 
     fun buttonEvent(playerID: Long, buttonID: String) {

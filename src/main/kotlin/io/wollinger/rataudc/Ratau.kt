@@ -5,6 +5,7 @@ import io.wollinger.rataudc.match.MatchManager
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
+import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
@@ -50,7 +51,8 @@ object Ratau: ListenerAdapter() {
 
     override fun onMessageReceived(event: MessageReceivedEvent) {
         event.author.idLong.also {
-            MatchManager.getUserMatch(it)?.handleMessage(it, event.message.contentRaw)
+            val success = MatchManager.getUserMatch(it)?.handleMessage(it, event.message.contentRaw) ?: false
+            if(success) event.message.addReaction(Emoji.fromUnicode("\uD83D\uDCDD")).queue()
         }
     }
 
