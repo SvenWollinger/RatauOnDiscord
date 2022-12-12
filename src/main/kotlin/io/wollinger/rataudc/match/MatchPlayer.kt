@@ -28,10 +28,12 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     val board = MatchBoard()
 
     fun updateOpponentBoard(opponent: MatchPlayer) {
+        println("$this: Updating opponent ($opponent)'s board")
         opponentBoardMessage.setImage(opponent.renderBoard(boardSize, boardSize, true)).queue()
     }
 
     fun updateBoard() {
+        println("$this: Updating board")
         boardMessage.setImage(renderBoard(boardSize, boardSize)).queue()
     }
 
@@ -68,6 +70,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     fun updateRollThing() {
+        println("$this: Updating dice tray")
         fun b(id: String, emoji: String, enabled: Boolean): Button {
             Button.secondary("${match.inviteLink}-${userID}-$id", Emoji.fromUnicode(emoji)).also {
                 return if(enabled) it else it.asDisabled()
