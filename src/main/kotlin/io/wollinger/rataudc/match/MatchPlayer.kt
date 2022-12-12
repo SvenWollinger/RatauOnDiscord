@@ -92,6 +92,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     fun refreshUpdateMessage() {
+        println("$this: Updating update message")
         val str = if(match.state == Match.STATE.END) {
             when (val won = match.betterPlayer()) {
                 null -> "Tie!"
