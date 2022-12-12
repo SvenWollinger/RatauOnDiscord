@@ -52,7 +52,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         if(board.addPiece(column, roll)) {
             roll = 0
             updateBoard()
-            updateRollThing()
+            updateDiceTray()
         }
     }
 
@@ -69,7 +69,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         }
     }
 
-    fun updateRollThing() {
+    fun updateDiceTray() {
         println("$this: Updating dice tray")
         fun b(id: String, emoji: String, enabled: Boolean): Button {
             Button.secondary("${match.inviteLink}-${userID}-$id", Emoji.fromUnicode(emoji)).also {
@@ -88,7 +88,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
 
     fun roll() {
         roll = (1..6).random()
-        updateRollThing()
+        updateDiceTray()
     }
 
     fun refreshUpdateMessage() {
@@ -111,7 +111,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         updateMessage = channel.sendFiles(Utils.renderStringToImage("", boardSize, textHeight / 2).toFileUpload()).complete()
         boardMessage = channel.sendFiles(renderBoard(boardSize, boardSize).toFileUpload()).complete()
         rollMessage = channel.sendMessage("roll").complete()
-        updateRollThing()
+        updateDiceTray()
         refreshUpdateMessage()
     }
 

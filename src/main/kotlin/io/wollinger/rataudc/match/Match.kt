@@ -87,9 +87,9 @@ class Match {
                 if(state == STATE.P1_TURN) state = STATE.P2_TURN
                 else if(state == STATE.P2_TURN) state = STATE.P1_TURN
                 player1!!.refreshUpdateMessage()
-                player1!!.updateRollThing()
+                player1!!.updateDiceTray()
                 player2!!.refreshUpdateMessage()
-                player2!!.updateRollThing()
+                player2!!.updateDiceTray()
             }
         }
         refreshLastUpdated()
@@ -119,7 +119,7 @@ class Match {
                         //Update said opponents boards message
                         p2.updateOpponentBoard(p1)
                         p2.updateBoard()
-                        p2.updateRollThing()
+                        p2.updateDiceTray()
                         //If opponents board changed with our change update our own opponentMessage as well
                         if(didChangeOpponent) p1.updateOpponentBoard(p2)
 
