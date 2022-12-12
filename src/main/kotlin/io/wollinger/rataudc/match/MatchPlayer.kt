@@ -68,13 +68,18 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     fun updateRollThing() {
-        fun b(btn: Button, b: Boolean) = if(b) btn else btn.asDisabled()
-        val isOurTurn = match.isMyTurn(this)
+        fun b(id: String, emoji: String, enabled: Boolean): Button {
+            Button.secondary("${match.inviteLink}-${userID}-$id", Emoji.fromUnicode(emoji)).also {
+                return if(enabled) it else it.asDisabled()
+            }
+        }
+
+        val allowSet = roll != 0 && board.hasSpace(0) && match.isMyTurn(this)
         rollMessage.setImage(Utils.renderDiceWithBG(roll, rollThingWidth, textHeight)).setContent("").setActionRow(
-            b(Button.secondary("${match.inviteLink}-${userID}-roll", Emoji.fromUnicode("\uD83C\uDFB2")), roll == 0),
-            b(Button.secondary("${match.inviteLink}-${userID}-p1", Emoji.fromUnicode("1️⃣")), roll != 0 && board.hasSpace(0) && isOurTurn),
-            b(Button.secondary("${match.inviteLink}-${userID}-p2", Emoji.fromUnicode("2️⃣")), roll != 0 && board.hasSpace(1) && isOurTurn),
-            b(Button.secondary("${match.inviteLink}-${userID}-p3", Emoji.fromUnicode("3️⃣")), roll != 0 && board.hasSpace(2) && isOurTurn)
+            b("roll", "\uD83C\uDFB2", roll == 0),
+            b("p1", "1️⃣", allowSet),
+            b("p2", "2️⃣", allowSet),
+            b("p3", "3️⃣", allowSet)
         ).complete()
     }
 
