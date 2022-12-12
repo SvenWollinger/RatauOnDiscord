@@ -27,13 +27,13 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     private val rollThingWidth = 96
     val board = MatchBoard()
 
-    fun updateOpponentBoard(opponent: MatchPlayer) {
-        match.log("$this: Updating opponent ($opponent)'s board")
+    fun updateOpponentBoard(opponent: MatchPlayer, reason: String) {
+        match.log("$this: Updating opponent ($opponent)'s board. Reason: $reason")
         opponentBoardMessage.setImage(opponent.renderBoard(boardSize, boardSize, true)).queue()
     }
 
-    fun updateBoard() {
-        match.log("$this: Updating board")
+    fun updateBoard(reason: String) {
+        match.log("$this: Updating board. Reason: $reason")
         boardMessage.setImage(renderBoard(boardSize, boardSize)).queue()
     }
 
@@ -51,8 +51,8 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     fun addPiece(column: Int) {
         if(board.addPiece(column, roll)) {
             roll = 0
-            updateBoard()
-            updateDiceTray()
+            updateBoard("Adding piece")
+            updateDiceTray("Adding piece")
         }
     }
 
@@ -69,8 +69,8 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         }
     }
 
-    fun updateDiceTray() {
-        match.log("$this: Updating dice tray")
+    fun updateDiceTray(reason: String) {
+        match.log("$this: Updating dice tray. Reason: $reason")
         fun b(id: String, emoji: String, enabled: Boolean): Button {
             Button.secondary("${match.inviteLink}-${userID}-$id", Emoji.fromUnicode(emoji)).also {
                 return if(enabled) it else it.asDisabled()
@@ -88,11 +88,11 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
 
     fun roll() {
         roll = (1..6).random()
-        updateDiceTray()
+        updateDiceTray("Roll")
     }
 
-    fun refreshUpdateMessage() {
-        match.log("$this: Updating update message")
+    fun refreshUpdateMessage(reason: String) {
+        match.log("$this: Updating update message. Reason: $reason")
         val str = if(match.state == Match.STATE.END) {
             when (val won = match.betterPlayer()) {
                 null -> "Tie!"
@@ -112,8 +112,8 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         updateMessage = channel.sendFiles(Utils.renderStringToImage("", boardSize, textHeight / 2).toFileUpload()).complete()
         boardMessage = channel.sendFiles(renderBoard(boardSize, boardSize).toFileUpload()).complete()
         rollMessage = channel.sendMessage("roll").complete()
-        updateDiceTray()
-        refreshUpdateMessage()
+        updateDiceTray("Setup")
+        refreshUpdateMessage("Setup")
     }
 
     private fun renderBoard(width: Int, height: Int, mirrored: Boolean = false): BufferedImage {

@@ -43,8 +43,8 @@ class Match(val inviteLink: String) {
 
         state = STATE.END
         if(isFull()) {
-            player1!!.refreshUpdateMessage()
-            player2!!.refreshUpdateMessage()
+            player1!!.refreshUpdateMessage("Game end")
+            player2!!.refreshUpdateMessage("Game end")
             fun s(p: MatchPlayer) {
                 p.channel.sendMessage("https://static.wikia.nocookie.net/cult-of-the-lamb/images/0/02/Ratau-knucklebones-win-game-loop.gif").queue()
                 p.channel.sendMessage("Thanks for playing!").queue()
@@ -85,10 +85,10 @@ class Match(val inviteLink: String) {
 
                 if(state == STATE.P1_TURN) state = STATE.P2_TURN
                 else if(state == STATE.P2_TURN) state = STATE.P1_TURN
-                player1!!.refreshUpdateMessage()
-                player1!!.updateDiceTray()
-                player2!!.refreshUpdateMessage()
-                player2!!.updateDiceTray()
+                player1!!.refreshUpdateMessage("Button press of $player")
+                player1!!.updateDiceTray("Button press of $player")
+                player2!!.refreshUpdateMessage("Button press of $player")
+                player2!!.updateDiceTray("Button press of $player")
             }
         }
         refreshLastUpdated()
@@ -116,11 +116,11 @@ class Match(val inviteLink: String) {
                         //Update opponent with our new board and check if there have been any updates
                         val didChangeOpponent = p2.updateFromOpponent(p1)
                         //Update said opponents boards message
-                        p2.updateOpponentBoard(p1)
-                        p2.updateBoard()
-                        p2.updateDiceTray()
+                        p2.updateOpponentBoard(p1, "Board modified of $p1")
+                        p2.updateBoard("Board modified of $p1")
+                        p2.updateDiceTray("Board modified of $p1")
                         //If opponents board changed with our change update our own opponentMessage as well
-                        if(didChangeOpponent) p1.updateOpponentBoard(p2)
+                        if(didChangeOpponent) p1.updateOpponentBoard(p2, "Board modified of $p1 - Caused change in board of $p2")
 
                         if(isDone())
                             endGame()
