@@ -34,8 +34,7 @@ object MatchManager {
         if(usersMatches.containsKey(userID)) return Response(Result.HAS_RUNNING_MATCH)
 
         val inviteLink = Utils.getInviteLink(userID)
-        Match().also {
-            it.inviteLink = inviteLink
+        Match(inviteLink).also {
             it.addPlayer(MatchPlayer(it, userID, channel))
             inviteMatches[inviteLink] = it
             usersMatches[userID] = it

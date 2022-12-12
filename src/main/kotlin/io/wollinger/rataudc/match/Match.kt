@@ -4,7 +4,7 @@ import io.wollinger.rataudc.Utils
 import java.lang.Exception
 import kotlin.concurrent.thread
 
-class Match {
+class Match(val inviteLink: String) {
     enum class STATE { P1_TURN, P2_TURN, END }
 
     var state = if((0..1).random() == 0) STATE.P1_TURN else STATE.P2_TURN
@@ -25,7 +25,6 @@ class Match {
     private var lastUpdated: Long = Utils.currentTime()
     private fun refreshLastUpdated() = kotlin.run { lastUpdated = Utils.currentTime() }
 
-    var inviteLink: String? = null
     private var player1: MatchPlayer? = null
         set(value) {
             field = value
@@ -156,7 +155,7 @@ class Match {
 
     fun isFull() = player1 != null && player2 != null
 
-    fun log(message: String) = println("M-${inviteLink?.slice(0..5)}: $message")
+    fun log(message: String) = println("M-${inviteLink.slice(0..5)}: $message")
 
     override fun toString() = "Match(player1=$player1, player2=$player2, inviteLink=$inviteLink)"
 }
