@@ -156,5 +156,7 @@ class Match {
 
     fun isFull() = player1 != null && player2 != null
 
+    fun log(message: String) = println("M-${inviteLink?.slice(0..5)}: $message")
+
     override fun toString() = "Match(player1=$player1, player2=$player2, inviteLink=$inviteLink)"
 }

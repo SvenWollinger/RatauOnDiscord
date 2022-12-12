@@ -28,12 +28,12 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     val board = MatchBoard()
 
     fun updateOpponentBoard(opponent: MatchPlayer) {
-        println("$this: Updating opponent ($opponent)'s board")
+        match.log("$this: Updating opponent ($opponent)'s board")
         opponentBoardMessage.setImage(opponent.renderBoard(boardSize, boardSize, true)).queue()
     }
 
     fun updateBoard() {
-        println("$this: Updating board")
+        match.log("$this: Updating board")
         boardMessage.setImage(renderBoard(boardSize, boardSize)).queue()
     }
 
@@ -70,7 +70,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     fun updateDiceTray() {
-        println("$this: Updating dice tray")
+        match.log("$this: Updating dice tray")
         fun b(id: String, emoji: String, enabled: Boolean): Button {
             Button.secondary("${match.inviteLink}-${userID}-$id", Emoji.fromUnicode(emoji)).also {
                 return if(enabled) it else it.asDisabled()
@@ -92,7 +92,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     }
 
     fun refreshUpdateMessage() {
-        println("$this: Updating update message")
+        match.log("$this: Updating update message")
         val str = if(match.state == Match.STATE.END) {
             when (val won = match.betterPlayer()) {
                 null -> "Tie!"
