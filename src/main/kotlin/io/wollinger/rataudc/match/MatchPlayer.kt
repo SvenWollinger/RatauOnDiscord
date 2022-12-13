@@ -56,15 +56,15 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         }
     }
 
-    private fun getPieceColor(column: Int, piece: Int): Color? {
-        if(piece == 0) return null
+    private fun getPieceType(column: Int, piece: Int): DiceType {
+        if(piece == 0) return DiceType.PLAIN
         val numbers = CopyOnWriteArrayList<Int>()
         for(i in 0..2) numbers.add(board.getPiece(column, i))
 
         return when(Collections.frequency(numbers, piece)) {
-            1 -> null
-            2 -> Color(255, 255, 0, 100)
-            3 -> Color(0, 0, 255, 100)
+            1 -> DiceType.PLAIN
+            2 -> DiceType.YELLOW
+            3 -> DiceType.BLUE
             else -> throw Exception(":(")
         }
     }
@@ -78,7 +78,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
         }
 
         val allowSet = roll != 0 && board.hasSpace(0) && match.isMyTurn(this)
-        rollMessage.setImage(Utils.renderDiceWithBG(roll, rollThingWidth, textHeight)).setContent("").setActionRow(
+        rollMessage.setImage(Utils.renderDiceWithBG(roll, rollThingWidth, textHeight, DiceType.PLAIN)).setContent("").setActionRow(
             b("roll", "\uD83C\uDFB2", roll == 0),
             b("p1", "1️⃣", allowSet),
             b("p2", "2️⃣", allowSet),
@@ -141,8 +141,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
                 for(x in 0 until 3) {
                     val piece = if(!mirrored) board.getPiece(x, y) else board.getPiece(x, 2 - y)
                     val addX = if(!mirrored) scoreSize * 2 else 0
-                    val color = getPieceColor(x, piece)
-                    g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight, color), x * cellWidth, y * cellHeight + addX, null)
+                    g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight, getPieceType(x, piece)), x * cellWidth, y * cellHeight + addX, null)
                 }
             }
 

@@ -1,0 +1,7 @@
+gimp magic tool: 100
+
+yellow color: f6cf15
+yellow alpha: 50%
+
+blue color: 2b5bb4
+blue alpha: 50%

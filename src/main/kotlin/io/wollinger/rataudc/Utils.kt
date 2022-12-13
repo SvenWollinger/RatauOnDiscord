@@ -40,8 +40,8 @@ object Utils {
         }
     }
 
-    fun renderDiceWithBG(piece: Int, width: Int, height: Int, color: Color? = null): BufferedImage {
-        val id = "${piece}_${width}_${height}_${color}"
+    fun renderDiceWithBG(piece: Int, width: Int, height: Int, type: DiceType): BufferedImage {
+        val id = "${piece}_${width}_${height}_${type}"
         return imgCache[id] ?: BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).also {
             val g = it.graphics as Graphics2D
             g.antialise()
@@ -49,11 +49,7 @@ object Utils {
             if(piece == 0) return@also
             val diceSize = (height * 0.8).toInt()
             fun d(n: Int) = n / 2 - diceSize / 2
-            g.drawImage(Resources.dice[piece - 1], d(width), d(height), diceSize, diceSize, null)
-            if(color != null) {
-                g.color = color
-                g.fillRect(d(width), d(height), diceSize, diceSize)
-            }
+            g.drawImage(Resources.dice[piece - 1].getByType(type), d(width), d(height), diceSize, diceSize, null)
         }.also {
             imgCache[id] = it
         }
