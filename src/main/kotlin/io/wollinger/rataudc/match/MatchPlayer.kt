@@ -65,7 +65,8 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
             b("roll", "\uD83C\uDFB2", roll == 0),
             b("p1", "1️⃣", allowSet),
             b("p2", "2️⃣", allowSet),
-            b("p3", "3️⃣", allowSet)
+            b("p3", "3️⃣", allowSet),
+            b("refresh", "\uD83D\uDD01", true)
         ).complete()
     }
 

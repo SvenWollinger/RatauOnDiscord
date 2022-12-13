@@ -90,6 +90,7 @@ class Match(val inviteLink: String) {
                 player2!!.refreshUpdateMessage("Button press of $player")
                 player2!!.updateDiceTray("Button press of $player")
             }
+            "refresh" -> player.updateDiceTray("Player caused refresh")
         }
         refreshLastUpdated()
     }
