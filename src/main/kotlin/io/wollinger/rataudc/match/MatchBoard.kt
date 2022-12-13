@@ -1,7 +1,10 @@
 package io.wollinger.rataudc.match
 
+import java.lang.Exception
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
+
+enum class DiceType { PLAIN, YELLOW, BLUE }
 
 class MatchBoard {
     var changeListener: ((MatchBoard) -> Unit)? = null
@@ -69,5 +72,18 @@ class MatchBoard {
             }
         }
         return didDestroy
+    }
+
+    fun getPieceType(column: Int, piece: Int): DiceType {
+        if(piece == 0) return DiceType.PLAIN
+        val numbers = CopyOnWriteArrayList<Int>()
+        for(i in 0..2) numbers.add(getPiece(column, i))
+
+        return when(Collections.frequency(numbers, piece)) {
+            1 -> DiceType.PLAIN
+            2 -> DiceType.YELLOW
+            3 -> DiceType.BLUE
+            else -> throw Exception(":(")
+        }
     }
 }

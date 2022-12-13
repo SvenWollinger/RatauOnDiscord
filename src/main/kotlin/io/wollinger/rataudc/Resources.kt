@@ -1,10 +1,10 @@
 package io.wollinger.rataudc
 
+import io.wollinger.rataudc.match.DiceType
 import java.awt.Font
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 
-enum class DiceType { PLAIN, YELLOW, BLUE }
 data class DiceTexture(val plain: BufferedImage, val yellow: BufferedImage,val blue: BufferedImage) {
     fun getByType(type: DiceType) = when(type) {
         DiceType.PLAIN -> plain

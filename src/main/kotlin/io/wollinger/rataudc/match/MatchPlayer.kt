@@ -5,12 +5,8 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.buttons.Button
-import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
-import java.lang.Exception
-import java.util.*
-import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.ArrayList
 
 class MatchPlayer(private val match: Match, val userID: Long, val channel: MessageChannel) {
@@ -53,19 +49,6 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
             roll = 0
             updateBoard("Adding piece")
             updateDiceTray("Adding piece")
-        }
-    }
-
-    private fun getPieceType(column: Int, piece: Int): DiceType {
-        if(piece == 0) return DiceType.PLAIN
-        val numbers = CopyOnWriteArrayList<Int>()
-        for(i in 0..2) numbers.add(board.getPiece(column, i))
-
-        return when(Collections.frequency(numbers, piece)) {
-            1 -> DiceType.PLAIN
-            2 -> DiceType.YELLOW
-            3 -> DiceType.BLUE
-            else -> throw Exception(":(")
         }
     }
 
@@ -141,7 +124,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
                 for(x in 0 until 3) {
                     val piece = if(!mirrored) board.getPiece(x, y) else board.getPiece(x, 2 - y)
                     val addX = if(!mirrored) scoreSize * 2 else 0
-                    g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight, getPieceType(x, piece)), x * cellWidth, y * cellHeight + addX, null)
+                    g.drawImage(Utils.renderDiceWithBG(piece, cellWidth, cellHeight, board.getPieceType(x, piece)), x * cellWidth, y * cellHeight + addX, null)
                 }
             }
 
