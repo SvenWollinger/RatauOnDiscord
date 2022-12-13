@@ -72,7 +72,7 @@ class MatchPlayer(private val match: Match, val userID: Long, val channel: Messa
     fun updateDiceTray(reason: String) {
         match.log("$this: Updating dice tray. Reason: $reason")
         fun b(id: String, emoji: String, enabled: Boolean): Button {
-            Button.secondary("${match.inviteLink}-${userID}-$id", Emoji.fromUnicode(emoji)).also {
+            Button.secondary("kb-${match.inviteLink}-${userID}-$id", Emoji.fromUnicode(emoji)).also {
                 return if(enabled) it else it.asDisabled()
             }
         }

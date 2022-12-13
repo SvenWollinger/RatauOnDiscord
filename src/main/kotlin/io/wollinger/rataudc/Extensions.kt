@@ -1,6 +1,7 @@
 package io.wollinger.rataudc
 
 import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.requests.restaction.MessageEditAction
 import net.dv8tion.jda.api.utils.FileUpload
 import net.dv8tion.jda.api.utils.messages.MessageEditData
@@ -23,3 +24,7 @@ fun Graphics2D.antialise() {
 }
 
 fun Message.setImage(image: BufferedImage): MessageEditAction = editMessage(MessageEditData.fromFiles(image.toFileUpload()))
+
+fun ButtonInteractionEvent.respondEmpty() {
+    reply(".").queue { it.deleteOriginal().queue() }
+}

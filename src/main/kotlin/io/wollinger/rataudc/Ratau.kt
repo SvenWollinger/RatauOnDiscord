@@ -19,6 +19,7 @@ object Ratau: ListenerAdapter() {
     lateinit var jda: JDA
 
     private val commands = HashMap<String, ICommand>().also {
+        it[Help.label] = Help
         it[KBCreate.label] = KBCreate
         it[KBJoin.label] = KBJoin
         it[KBLeave.label] = KBLeave
@@ -57,17 +58,16 @@ object Ratau: ListenerAdapter() {
     }
 
     override fun onButtonInteraction(event: ButtonInteractionEvent) {
-        //We need to reply, so we do this
-        event.reply(".").queue { it.deleteOriginal().queue() }
-
-        val parts = event.componentId.split("-")
-        if(parts.size < 3) return
-
-        val intendedID = parts[1].toLong()
-        //Only allow the user the button is meant to to use it
-        if(intendedID != event.user.idLong) return
-
-        MatchManager.getMatch(parts[0])?.buttonEvent(intendedID, parts[2])
+        val parts = event.componentId.split("-").toMutableList()
+        when(parts.removeAt(0)) {
+            "help" -> Help.doHelp(event, parts[0])
+            "kb" -> {
+                event.respondEmpty()
+                val buttonOwner = parts[1].toLong()
+                if(buttonOwner != event.user.idLong) return
+                MatchManager.getMatch(parts[0])?.buttonEvent(buttonOwner, parts[2])
+            }
+        }
     }
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
