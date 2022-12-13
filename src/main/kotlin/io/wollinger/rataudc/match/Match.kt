@@ -63,7 +63,7 @@ class Match(val inviteLink: String) {
     fun handleMessage(playerID: Long, message: String): Boolean {
         fun s(p: MatchPlayer, o: MatchPlayer): Boolean {
             if(p.userID != playerID) return false
-            o.channel.sendMessage("${player1!!.username}: $message").queue()
+            o.channel.sendMessage("${p.username}: $message").queue()
             return true
         }
         if(!isFull()) return false
