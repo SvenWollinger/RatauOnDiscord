@@ -17,6 +17,9 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag
 
 object Ratau: ListenerAdapter() {
     lateinit var jda: JDA
+    lateinit var token: String
+    lateinit var ownerID: String
+    lateinit var ownerUsername: String
 
     private val commands = HashMap<String, ICommand>().also {
         it[Help.label] = Help
@@ -25,7 +28,7 @@ object Ratau: ListenerAdapter() {
         it[KBLeave.label] = KBLeave
     }
 
-    fun init(token: String) {
+    fun init() {
         //Set up JDA
         jda = JDABuilder.createDefault(token).also {
             it.disableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE)

@@ -16,6 +16,7 @@ dependencies {
     implementation("net.dv8tion:JDA:${properties["jda.version"]}")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("commons-codec:commons-codec:1.15")
+    implementation("org.json:json:20220924")
 }
 
 tasks.withType<KotlinCompile> {
