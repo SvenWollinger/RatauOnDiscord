@@ -1,5 +1,6 @@
 package io.wollinger.rataudc
 
+import io.wollinger.rataudc.match.DiceType
 import org.apache.commons.codec.digest.DigestUtils
 import java.awt.*
 import java.awt.image.BufferedImage
