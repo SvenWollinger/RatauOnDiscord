@@ -14,6 +14,7 @@ import javax.imageio.ImageIO
 fun BufferedImage.toFileUpload(): FileUpload {
     File.createTempFile("ratau-tmp", ".png").also {
         ImageIO.write(this, "png", it)
+        it.deleteOnExit()
         return FileUpload.fromData(it)
     }
 }
